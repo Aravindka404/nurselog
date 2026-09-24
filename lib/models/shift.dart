@@ -59,6 +59,8 @@ class Shift {
     this.offDutyType,
   });
 
+  String get label => title.isNotEmpty ? title : shiftType.label;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

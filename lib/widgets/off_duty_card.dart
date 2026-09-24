@@ -37,10 +37,10 @@ class OffDutyCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Record your scheduled rest days and recovery time',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: textSecondary,
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 18),
