@@ -20,25 +20,35 @@ class RecentShiftsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header
+        // Section Header with History Icon & View All link
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Recent Shifts',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
-                letterSpacing: -0.3,
-              ),
+            const Row(
+              children: [
+                Icon(
+                  Icons.history_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Recent Shifts',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
             ),
             GestureDetector(
               onTap: onSeeAll,
               child: const Text(
-                'See all',
+                'View All',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
                 ),
@@ -46,26 +56,45 @@ class RecentShiftsList extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
 
         // List items
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: shifts.length > 2 ? 2 : shifts.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final shift = shifts[index];
-            return _buildShiftItemCard(context, shift);
-          },
-        ),
+        if (shifts.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.cardBorder),
+            ),
+            child: const Center(
+              child: Text(
+                'No recent shifts logged yet.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: shifts.length > 3 ? 3 : shifts.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final shift = shifts[index];
+              return _buildShiftCard(context, shift);
+            },
+          ),
       ],
     );
   }
 
-  Widget _buildShiftItemCard(BuildContext context, Shift shift) {
-    final isDay = shift.shiftType == ShiftType.day;
-    final dateStr = DateFormat('MMM d, yyyy').format(shift.date);
+  Widget _buildShiftCard(BuildContext context, Shift shift) {
+    final dateStr = DateFormat('MMM d').format(shift.date);
     final hoursFormatted = shift.hoursWorked % 1 == 0
         ? shift.hoursWorked.toInt().toString()
         : shift.hoursWorked.toString();
@@ -73,65 +102,140 @@ class RecentShiftsList extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder, width: 1),
         boxShadow: AppColors.cardShadow,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           onTap: () => onShiftTap?.call(shift),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Icon Container
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: isDay ? AppColors.dayAccentBg : AppColors.nightAccentBg,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    isDay ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                    color: isDay ? AppColors.dayIcon : AppColors.nightIcon,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-
-                // Title & Subtitle
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        dateStr,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                // Top Row: Calendar Icon + Title/Facility + Verified Badge
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceLow,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.calendar_today_rounded,
+                          color: AppColors.primary,
+                          size: 16,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${shift.label} • $hoursFormatted hrs',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Title & Facility
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$dateStr • ${shift.label}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            shift.facility,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Verified Badge Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified_rounded,
+                            size: 12,
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Verified',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Divider Line
+                Container(
+                  height: 1,
+                  color: AppColors.surfaceContainer,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Bottom Row: Schedule Time + Hours Worked
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.schedule_rounded,
+                          size: 14,
                           color: AppColors.textSecondary,
                         ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '${shift.startTime} – ${shift.endTime}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '$hoursFormatted hrs',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
-                    ],
-                  ),
-                ),
-
-                // Trailing Chevron
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFFC4CBD5),
-                  size: 24,
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -25,10 +25,11 @@ class ShiftDataSummaryCard extends StatelessWidget {
         : totalHours.toStringAsFixed(1);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder, width: 1),
         boxShadow: AppColors.cardShadow,
       ),
       child: Column(
@@ -44,7 +45,7 @@ class ShiftDataSummaryCard extends StatelessWidget {
                   const Text(
                     'Shift Data Summary',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                       letterSpacing: -0.3,
@@ -62,34 +63,30 @@ class ShiftDataSummaryCard extends StatelessWidget {
                 ],
               ),
               Container(
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEBF3FF),
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.surfaceLow,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.insert_chart_outlined_rounded,
                   color: AppColors.primary,
-                  size: 20,
+                  size: 18,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Total Hours Done Highlight Card
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFF0F5FF), Color(0xFFE8F1FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFDCE8FD)),
+              color: AppColors.primaryLight.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.primary.withOpacity(0.15)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -97,45 +94,38 @@ class ShiftDataSummaryCard extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
-                        Icons.access_time_rounded,
+                        Icons.schedule_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: 18,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         Text(
                           'TOTAL HOURS DONE',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: FontWeight.w700,
                             color: AppColors.primary,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.6,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        SizedBox(height: 1),
                         Text(
                           'Completed shift duration',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF64748B),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -149,10 +139,10 @@ class ShiftDataSummaryCard extends StatelessWidget {
                     Text(
                       hoursDisplay,
                       style: const TextStyle(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: FontWeight.w900,
                         color: AppColors.primary,
-                        letterSpacing: -0.5,
+                        letterSpacing: -0.4,
                       ),
                     ),
                     const SizedBox(width: 3),
@@ -179,27 +169,27 @@ class ShiftDataSummaryCard extends StatelessWidget {
                 child: _buildMetricTile(
                   icon: Icons.wb_sunny_rounded,
                   iconColor: const Color(0xFFD97706),
-                  iconBg: const Color(0xFFFEF3C7),
+                  iconBg: const Color(0xFFFFF6ED),
                   count: dayCount,
                   label: 'Day Shifts',
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildMetricTile(
-                  icon: Icons.nightlight_round,
-                  iconColor: const Color(0xFF9333EA),
-                  iconBg: const Color(0xFFF3E8FF),
+                  icon: Icons.wb_twilight_rounded,
+                  iconColor: AppColors.secondary,
+                  iconBg: AppColors.secondaryContainer,
                   count: eveCount,
                   label: 'Evening',
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildMetricTile(
                   icon: Icons.bedtime_rounded,
-                  iconColor: const Color(0xFF4338CA),
-                  iconBg: const Color(0xFFE0E7FF),
+                  iconColor: AppColors.primary,
+                  iconBg: AppColors.primaryLight,
                   count: nightCount,
                   label: 'Night Shifts',
                 ),
@@ -219,40 +209,40 @@ class ShiftDataSummaryCard extends StatelessWidget {
     required String label,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F4F8)),
+        color: AppColors.surfaceLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder, width: 1),
       ),
       child: Column(
         children: [
           Container(
-            width: 30,
-            height: 30,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: iconBg,
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: iconColor, size: 16),
+            child: Icon(icon, color: iconColor, size: 15),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             count.toString(),
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w900,
               color: AppColors.textPrimary,
-              letterSpacing: -0.5,
+              letterSpacing: -0.4,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
             ),

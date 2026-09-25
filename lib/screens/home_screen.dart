@@ -30,132 +30,222 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Header with Tappable Profile Icon (Item 3 & 4)
-              _buildHeader(context),
+        child: Column(
+          children: [
+            // Top App Bar matching Stitch Brand Header
+            _buildTopAppBar(context),
 
-              const SizedBox(height: 24),
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Welcome Greeting Banner with Calendar Launcher
+                    _buildWelcomeBanner(context),
 
-              // Quick Log Today's Shift Card (Items 1 & 2)
-              QuickLogCard(controller: controller),
+                    const SizedBox(height: 18),
 
-              const SizedBox(height: 24),
+                    // Primary Interactive Card: Quick Log Today's Shift
+                    QuickLogCard(controller: controller),
 
-              // "Mark Time Off" Section
-              OffDutyCard(controller: controller),
+                    const SizedBox(height: 18),
 
-              const SizedBox(height: 26),
+                    // Shift Pattern / Mark Time Off Section
+                    OffDutyCard(controller: controller),
 
-              // Recent Shifts Section
-              RecentShiftsList(
-                shifts: controller.recentShifts,
-                onSeeAll: onOpenCalendar,
-                onShiftTap: (shift) => onOpenCalendar(),
+                    const SizedBox(height: 20),
+
+                    // Recent Shifts Section
+                    RecentShiftsList(
+                      shifts: controller.recentShifts,
+                      onSeeAll: onOpenCalendar,
+                      onShiftTap: (shift) => onOpenCalendar(),
+                    ),
+
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    const textPrimary = AppColors.textPrimary;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            // Tappable Profile Avatar triggering Settings Modal (Item 3 & 4)
-            GestureDetector(
-              onTap: () => _openSettings(context),
-              child: Container(
-                width: 50,
-                height: 50,
+  // Top App Bar with Terra Organic Forest Logo Badge & Notifications/Profile
+  Widget _buildTopAppBar(BuildContext context) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.95),
+        border: const Border(
+          bottom: BorderSide(color: AppColors.surfaceHighest, width: 1),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo & Brand Name
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFFE8F1FF),
-                      Color(0xFFD0E3FF),
-                    ],
-                  ),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2.5,
-                  ),
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.18),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
+                      color: AppColors.primary.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: const Center(
                   child: Icon(
-                    Icons.medical_services_rounded,
-                    color: AppColors.primary,
-                    size: 26,
+                    Icons.spa_rounded,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 14),
+              const SizedBox(width: 10),
+              const Text(
+                'PULSECARE SHIFTS',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
+          ),
 
-            // Greeting text
-            GestureDetector(
-              onTap: () => _openSettings(context),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          // Notification Bell & Profile Avatar Action
+          Row(
+            children: [
+              // Notification Bell with unread dot
+              Stack(
                 children: [
-                  Text(
-                    'Welcome,',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: textPrimary,
-                      letterSpacing: -0.3,
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: AppColors.textSecondary,
+                      size: 24,
                     ),
+                    splashRadius: 20,
+                    tooltip: 'Notifications',
                   ),
-                  Text(
-                    controller.userName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
-                      letterSpacing: -0.3,
+                  Positioned(
+                    top: 10,
+                    right: 12,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 4),
 
-        // Quick action button (Calendar Icon in soft blue circle)
-        GestureDetector(
-          onTap: onOpenCalendar,
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.calendar_month_rounded,
-              color: AppColors.primary,
-              size: 22,
+              // Profile Avatar Button (Opens Settings)
+              GestureDetector(
+                onTap: () => _openSettings(context),
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.25),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.person_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Welcome Greeting Banner
+  Widget _buildWelcomeBanner(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome, ${controller.userName}',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -0.4,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'Ready to record your shift today?',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+
+        // Quick Calendar Launcher Button
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onOpenCalendar,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.cardBorder, width: 1),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.calendar_month_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
+              ),
             ),
           ),
         ),

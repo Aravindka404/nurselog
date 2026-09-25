@@ -1,87 +1,90 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Medical Blues
-  static const Color primary = Color(0xFF1B68F8);
-  static const Color primaryDark = Color(0xFF0B4FD9);
-  static const Color primaryLight = Color(0xFFEBF3FF);
-  static const Color primaryTint = Color(0xFFF0F5FF);
+  // Primary Forest Clinical Brand (Stitch PulseCare Shifts)
+  static const Color primary = Color(0xFF316342);
+  static const Color primaryContainer = Color(0xFF4A7C59);
+  static const Color primaryDark = Color(0xFF1E5031);
+  static const Color primaryLight = Color(0xFFB9EFC5);
+  static const Color primaryFixed = Color(0xFFB9EFC5);
+  static const Color primaryTint = Color(0xFFE1FFE5);
 
-  // Light Backgrounds & Surfaces
-  static const Color background = Color(0xFFF5F7FA);
+  // Secondary Warm Sand / Earth Accents
+  static const Color secondary = Color(0xFF655D52);
+  static const Color secondaryContainer = Color(0xFFE9DED0);
+  static const Color secondaryLight = Color(0xFFECE1D3);
+
+  // Tertiary Muted Warm Gold
+  static const Color tertiary = Color(0xFF6D5622);
+  static const Color tertiaryContainer = Color(0xFF886E38);
+  static const Color tertiaryFixed = Color(0xFFFFDEA0);
+
+  // Surfaces & Backgrounds
+  static const Color background = Color(0xFFF7FAF4);
   static const Color surface = Colors.white;
-  static const Color inputBackground = Color(0xFFF3F5F9);
-  static const Color cardBorder = Color(0xFFEDF1F7);
+  static const Color surfaceLow = Color(0xFFF1F5EF);
+  static const Color surfaceContainer = Color(0xFFECEFE9);
+  static const Color surfaceHigh = Color(0xFFE6E9E3);
+  static const Color surfaceHighest = Color(0xFFE0E3DE);
+  static const Color inputBackground = Color(0xFFF1F5EF);
+  static const Color cardBorder = Color(0xFFE0E3DE);
 
-  // Dark Mode Surfaces (Deep Charcoal & True Black Aesthetic)
-  static const Color darkBackground = Color(0xFF0B1120);
-  static const Color darkSurface = Color(0xFF1E293B);
-  static const Color darkCardBorder = Color(0xFF334155);
-  static const Color darkInputBackground = Color(0xFF131D30);
+  // Typography
+  static const Color textPrimary = Color(0xFF191D19);
+  static const Color textSecondary = Color(0xFF414942);
+  static const Color textMuted = Color(0xFF717971);
+  static const Color outline = Color(0xFF717971);
+  static const Color outlineVariant = Color(0xFFC1C9BF);
 
-  // Typography / Text Colors
-  static const Color textPrimary = Color(0xFF111827);
-  static const Color textSecondary = Color(0xFF8E9AAB);
-  static const Color textMuted = Color(0xFFB0B9C6);
-
-  static const Color darkTextPrimary = Color(0xFFF8FAFC);
-  static const Color darkTextSecondary = Color(0xFF94A3B8);
-
-  // Accents & Badges
-  static const Color dayAccentBg = Color(0xFFFFF9E6);
+  // Semantic Status & Types
+  static const Color dayAccentBg = Color(0xFFFFF6ED);
   static const Color dayIcon = Color(0xFFD97706);
 
-  static const Color eveningAccentBg = Color(0xFFF3E8FF);
-  static const Color eveningIcon = Color(0xFF9333EA);
+  static const Color eveningAccentBg = Color(0xFFE9DED0);
+  static const Color eveningIcon = Color(0xFF655D52);
 
-  static const Color nightAccentBg = Color(0xFFEEF2FF);
-  static const Color nightIcon = Color(0xFF4F46E5);
+  static const Color nightAccentBg = Color(0xFFB9EFC5);
+  static const Color nightIcon = Color(0xFF316342);
 
-  static const Color offDutyAccentBg = Color(0xFFECFDF5);
-  static const Color offDutyIcon = Color(0xFF059669);
+  static const Color offDutyAccentBg = Color(0xFFECEFE9);
+  static const Color offDutyIcon = Color(0xFF655D52);
 
-  static const Color pdfRed = Color(0xFFEF4444);
-  static const Color csvGreen = Color(0xFF10B981);
+  static const Color pdfRed = Color(0xFFBA1A1A);
+  static const Color csvGreen = Color(0xFF316342);
+  static const Color error = Color(0xFFBA1A1A);
+  static const Color errorContainer = Color(0xFFFFDAD6);
 
-  // Gradients
+  // Primary Gradient
   static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
     colors: [
-      Color(0xFF246CF9),
-      Color(0xFF0B4FD9),
+      Color(0xFF316342),
+      Color(0xFF4A7C59),
     ],
   );
 
-  // Soft Shadows
+  // Subtle ambient shadows matching Stitch elevation system
   static List<BoxShadow> get cardShadow => [
         BoxShadow(
-          color: const Color(0xFF1E293B).withOpacity(0.04),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
+          color: const Color(0xFF2E3230).withOpacity(0.04),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
           spreadRadius: 0,
         ),
         BoxShadow(
-          color: const Color(0xFF1E293B).withOpacity(0.02),
-          blurRadius: 6,
-          offset: const Offset(0, 2),
-        ),
-      ];
-
-  static List<BoxShadow> get darkCardShadow => [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.3),
-          blurRadius: 24,
-          offset: const Offset(0, 8),
+          color: const Color(0xFF2E3230).withOpacity(0.02),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
         ),
       ];
 
   static List<BoxShadow> get buttonGlow => [
         BoxShadow(
-          color: primary.withOpacity(0.38),
-          blurRadius: 18,
-          offset: const Offset(0, 8),
-          spreadRadius: 1,
+          color: primary.withOpacity(0.24),
+          blurRadius: 14,
+          offset: const Offset(0, 6),
+          spreadRadius: 0,
         ),
       ];
 }

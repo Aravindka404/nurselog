@@ -13,18 +13,19 @@ class CalendarGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder, width: 1),
         boxShadow: AppColors.cardShadow,
       ),
       child: Column(
         children: [
-          // Weekdays Header: S M T W T F S
+          // Weekdays Header: Mon, Tue, Wed, Thu, Fri, Sat, Sun
           _buildWeekdayHeader(),
-          const SizedBox(height: 16),
-          // Days Grid (Dynamic for any month/year - Item 5)
+          const SizedBox(height: 12),
+          // Days Grid
           _buildDynamicDaysGrid(),
         ],
       ),
@@ -32,18 +33,18 @@ class CalendarGrid extends StatelessWidget {
   }
 
   Widget _buildWeekdayHeader() {
-    const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: weekdays
           .map(
             (day) => SizedBox(
-              width: 38,
+              width: 36,
               child: Center(
                 child: Text(
                   day,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textSecondary,
                   ),
@@ -59,10 +60,9 @@ class CalendarGrid extends StatelessWidget {
     final currentYear = controller.currentMonth.year;
     final currentMonth = controller.currentMonth.month;
 
-    // 1. Calculate first weekday offset (Sunday = 0, Monday = 1 ... Saturday = 6)
-    final firstWeekday = DateTime(currentYear, currentMonth, 1).weekday % 7;
+    // Monday-based first weekday offset (Mon = 0, Tue = 1 ... Sun = 6)
+    final firstWeekday = (DateTime(currentYear, currentMonth, 1).weekday - 1) % 7;
 
-    // 2. Days in current month and previous month
     final daysInCurrentMonth = DateTime(currentYear, currentMonth + 1, 0).day;
     final daysInPrevMonth = DateTime(currentYear, currentMonth, 0).day;
 
@@ -108,9 +108,9 @@ class CalendarGrid extends StatelessWidget {
       itemCount: allCells.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 6,
-        childAspectRatio: 1.0,
+        mainAxisSpacing: 6,
+        crossAxisSpacing: 4,
+        childAspectRatio: 0.88,
       ),
       itemBuilder: (context, index) {
         final cell = allCells[index];
@@ -119,91 +119,73 @@ class CalendarGrid extends StatelessWidget {
             cell.date.month == controller.selectedDate.month &&
             cell.date.day == controller.selectedDate.day;
 
-        return GestureDetector(
-          onTap: () {
-            if (cell.isCurrentMonth) {
-              controller.selectDate(cell.date);
-            }
-          },
-          behavior: HitTestBehavior.opaque,
-          child: _buildDayCell(cell, isSelected),
-        );
+        return _buildCell(cell, isSelected);
       },
     );
   }
 
-  Widget _buildDayCell(_CalendarCellData cell, bool isSelected) {
-    if (isSelected) {
-      // Fix for Item 5: Ensure numerical date is ALWAYS prominently visible
-      return Container(
+  Widget _buildCell(_CalendarCellData cell, bool isSelected) {
+    if (!cell.isCurrentMonth) {
+      return Center(
+        child: Text(
+          '${cell.dayNumber}',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.outlineVariant,
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        controller.selectDate(cell.date);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: isSelected ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.35),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          border: isSelected
+              ? Border.all(color: AppColors.primaryLight, width: 2)
+              : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              cell.dayNumber.toString(),
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: -0.2,
+              '${cell.dayNumber}',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 2),
-            if (cell.isCurrentMonth && cell.hasShift)
+            const SizedBox(height: 3),
+            if (cell.hasShift)
               Container(
-                width: 4,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.white : AppColors.primary,
                   shape: BoxShape.circle,
                 ),
               )
             else
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
           ],
         ),
-      );
-    }
-
-    final textColor = cell.isCurrentMonth
-        ? AppColors.textPrimary
-        : const Color(0xFFCBD5E1);
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          cell.dayNumber.toString(),
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: cell.isCurrentMonth ? FontWeight.w600 : FontWeight.w500,
-            color: textColor,
-          ),
-        ),
-        const SizedBox(height: 3),
-        if (cell.isCurrentMonth && cell.hasShift)
-          Container(
-            width: 4.5,
-            height: 4.5,
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-          )
-        else
-          const SizedBox(height: 4.5),
-      ],
+      ),
     );
   }
 }
@@ -214,7 +196,7 @@ class _CalendarCellData {
   final DateTime date;
   final bool hasShift;
 
-  const _CalendarCellData({
+  _CalendarCellData({
     required this.dayNumber,
     required this.isCurrentMonth,
     required this.date,

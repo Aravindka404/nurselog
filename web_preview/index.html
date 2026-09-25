@@ -3,571 +3,823 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>NurseLog</title>
+  <title>PulseCare Shifts - Nurse Timesheet Tracker</title>
   
   <!-- PWA & Mobile Web Capabilities -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="NurseLog">
+  <meta name="apple-mobile-web-app-title" content="PulseCare Shifts">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#1B68F8">
+  <meta name="theme-color" content="#316342">
+  
+  <!-- Google Fonts: DM Sans & Nunito Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,300..900;1,6..12,300..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#316342",
+            "primary-container": "#4a7c59",
+            "primary-fixed": "#b9efc5",
+            "on-primary-fixed": "#00210e",
+            "on-primary": "#ffffff",
+            background: "#f7faf4",
+            surface: "#f7faf4",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f1f5ef",
+            "surface-container": "#ecefe9",
+            "surface-container-highest": "#e0e3de",
+            "on-surface": "#191d19",
+            "on-surface-variant": "#414942",
+            secondary: "#655d52",
+            "secondary-container": "#e9ded0",
+            "on-secondary-container": "#696156",
+            "secondary-fixed": "#ece1d3",
+            "on-secondary-fixed": "#201b12",
+            outline: "#717971",
+            "outline-variant": "#c1c9bf",
+            error: "#ba1a1a",
+            "error-container": "#ffdad6",
+            tertiary: "#6d5622",
+            "tertiary-fixed": "#ffdea0",
+            "on-tertiary-fixed": "#261a00"
+          },
+          fontFamily: {
+            headline: ["DM Sans", "sans-serif"],
+            body: ["Nunito Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
-      transition: background-color 0.3s ease, color 0.3s ease;
+      overscroll-behavior-y: none;
     }
-    .custom-glow {
-      box-shadow: 0 10px 25px -3px rgba(27, 104, 248, 0.4), 0 4px 6px -4px rgba(27, 104, 248, 0.2);
+    ::-webkit-scrollbar { display: none; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
     }
-    .card-shadow {
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1;
+    }
+    @keyframes avatarPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(74, 124, 89, 0.28), 0 4px 14px rgba(49, 99, 66, 0.15);
+      }
+      50% {
+        box-shadow: 0 0 0 6px rgba(74, 124, 89, 0.1), 0 6px 20px rgba(49, 99, 66, 0.22);
+      }
+    }
+    .avatar-halo {
+      animation: avatarPulse 4s ease-in-out infinite;
+    }
+    @keyframes bellWiggle {
+      0%, 100% { transform: rotate(0deg); }
+      20%, 60% { transform: rotate(14deg); }
+      40%, 80% { transform: rotate(-14deg); }
+    }
+    .bell-icon-hover:hover .bell-icon {
+      animation: bellWiggle 0.6s ease-in-out;
+    }
+    @keyframes shimmerSweep {
+      0% { transform: translateX(-100%); }
+      60%, 100% { transform: translateX(200%); }
+    }
+    .animate-shimmer {
+      animation: shimmerSweep 3s infinite ease-in-out;
     }
   </style>
 </head>
-<body class="bg-[#F5F7FA] text-[#111827] min-h-screen flex flex-col justify-between select-none">
+<body class="bg-[#f7faf4] text-on-surface min-h-screen flex flex-col justify-between select-none">
 
   <!-- Toast Notification Overlay -->
-  <div id="toast" class="fixed top-6 left-5 right-5 max-w-sm mx-auto bg-[#1B68F8] text-white text-xs font-bold py-3 px-5 rounded-2xl shadow-xl transition-all duration-300 opacity-0 -translate-y-6 pointer-events-none z-50 text-center">
-    Shift logged successfully!
+  <div id="toast" class="fixed top-6 left-5 right-5 max-w-sm mx-auto bg-primary text-white text-xs font-bold py-3 px-5 rounded-2xl shadow-xl transition-all duration-300 opacity-0 -translate-y-6 pointer-events-none z-50 text-center flex items-center justify-center gap-2">
+    <span class="material-symbols-outlined text-[18px]">check_circle</span>
+    <span id="toast-text">Shift logged successfully!</span>
   </div>
 
-  <!-- ================= DUPLICATE SHIFT WARNING MODAL (Item 5) ================= -->
-  <div id="duplicate-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden transition-opacity duration-200 opacity-0 flex items-center justify-center p-5">
-    <div id="duplicate-dialog" class="bg-white w-full max-w-sm rounded-[28px] p-6 card-shadow space-y-4 transform scale-95 transition-transform duration-200">
+  <!-- ================= DUPLICATE SHIFT WARNING MODAL ================= -->
+  <div id="duplicate-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden transition-opacity duration-200 opacity-0 flex items-center justify-center p-5">
+    <div id="duplicate-dialog" class="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-xl border border-outline-variant/50 space-y-4 transform scale-95 transition-transform duration-200">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-2xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center flex-shrink-0">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div class="w-12 h-12 rounded-2xl bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-[26px]">warning</span>
         </div>
         <div>
-          <h3 class="text-lg font-black text-[#111827] leading-tight">Shift Already Marked</h3>
-          <p class="text-xs text-[#8E9AAB] font-medium mt-0.5">Existing record detected</p>
+          <h3 class="text-lg font-headline font-bold text-on-surface leading-tight">Shift Already Marked</h3>
+          <p class="text-xs text-on-surface-variant font-medium mt-0.5">Existing record detected</p>
         </div>
       </div>
-      <p class="text-sm font-semibold text-[#64748B] leading-relaxed">
-        A shift is already marked for this day. Should we change it?
+      <p class="text-sm font-semibold text-secondary leading-relaxed">
+        A shift is already marked for this day. Should we update and overwrite it?
       </p>
       <div class="flex gap-2.5 pt-2">
-        <button onclick="closeDuplicateModal()" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 active:bg-slate-100 transition-colors">
+        <button onclick="closeDuplicateModal()" class="flex-1 py-3 px-4 rounded-xl border border-outline-variant text-xs font-bold text-secondary active:bg-surface-container-low transition-colors">
           Cancel
         </button>
-        <button onclick="confirmOverwriteShift()" class="flex-1 py-3 px-4 bg-[#1B68F8] text-white text-xs font-extrabold rounded-xl active:scale-95 transition-all shadow-md">
+        <button onclick="confirmOverwriteShift()" class="flex-1 py-3 px-4 bg-primary text-white text-xs font-extrabold rounded-xl active:scale-95 transition-all shadow-md">
           Update / Overwrite
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= SETTINGS MODAL (Items 3 & 4) ================= -->
+  <!-- ================= SETTINGS & PROFILE MODAL ================= -->
   <div id="settings-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0 flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div id="settings-sheet" class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 card-shadow space-y-5 max-h-[85vh] overflow-y-auto transform translate-y-full transition-transform duration-300">
+    <div id="settings-sheet" class="bg-surface w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-5 shadow-2xl border border-outline-variant/40 space-y-4 max-h-[90vh] overflow-y-auto transform translate-y-full transition-transform duration-300">
       
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <!-- Modal Top Bar -->
+      <div class="flex items-center justify-between border-b border-surface-container-highest pb-3">
+        <div class="flex items-center gap-2">
+          <button onclick="closeSettings()" class="w-9 h-9 rounded-full bg-white border border-outline-variant/40 flex items-center justify-center text-on-surface active:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          </button>
+          <h3 class="text-lg font-headline font-bold text-on-surface">Profile &amp; Settings</h3>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[18px]">person</span>
+        </div>
+      </div>
+
+      <!-- Hero Profile Card -->
+      <div class="bg-surface-container-low rounded-2xl p-5 shadow-sm flex flex-col items-center text-center relative overflow-hidden border border-outline-variant/30">
+        <div class="relative mb-3">
+          <div class="w-20 h-20 rounded-full overflow-hidden shadow-sm bg-primary/10 avatar-halo flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[44px]">person</span>
+          </div>
+          <button class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-md active:scale-90 transition-transform">
+            <span class="material-symbols-outlined text-[15px]">photo_camera</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-1.5 mb-0.5">
+          <h2 id="settings-profile-name" class="font-headline font-bold text-lg text-on-surface">Sarah Jenkins, RN</h2>
+          <span class="material-symbols-outlined text-primary text-[18px] fill" title="Verified Registered Nurse">verified</span>
+        </div>
+        <span class="text-xs text-secondary font-medium">Verified Active Practitioner</span>
+      </div>
+
+      <!-- Section 1: Personal Information -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-outline-variant/50 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+            <span class="material-symbols-outlined text-[18px]">badge</span>
+          </div>
+          <div>
+            <h4 class="font-headline font-bold text-sm text-on-surface">Personal Information</h4>
+            <p class="text-[11px] text-on-surface-variant">Credentials &amp; timesheet identification</p>
+          </div>
+        </div>
         <div>
-          <h3 class="text-xl font-extrabold text-[#111827]">Preferences & Settings</h3>
-          <p class="text-xs text-[#8E9AAB] font-medium mt-0.5">Customize profile, theme & shift defaults</p>
-        </div>
-        <button onclick="closeSettings()" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 active:bg-slate-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <!-- Section 0: Nurse Profile & Appearance (Items 2 & 3) -->
-      <div class="space-y-3">
-        <label class="text-[11px] font-extrabold text-[#8E9AAB] tracking-wider uppercase">NURSE PROFILE</label>
-        <div class="relative">
-          <input 
-            id="nurse-name-input" 
-            type="text" 
-            value="Nurse Sarah" 
-            oninput="updateNurseName(this.value)" 
-            placeholder="Enter your name" 
-            class="w-full pl-10 pr-4 py-2.5 bg-[#F4F6F9] rounded-xl text-xs font-bold text-[#111827] outline-none border border-transparent focus:border-[#1B68F8] focus:bg-white transition-all"
-          />
-          <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#1B68F8]">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+          <label class="text-[10px] font-extrabold text-on-surface-variant tracking-wider uppercase">NURSE NAME</label>
+          <div class="relative mt-1">
+            <input 
+              id="nurse-name-input" 
+              type="text" 
+              value="Sarah Jenkins, RN" 
+              oninput="updateNurseName(this.value)" 
+              placeholder="Enter your name" 
+              class="w-full pl-3.5 pr-10 py-2.5 bg-surface-container-low rounded-xl text-xs font-bold text-on-surface outline-none border border-transparent focus:border-primary focus:bg-white transition-all"
+            />
+            <span class="absolute right-3 top-2.5 text-on-surface-variant material-symbols-outlined text-[18px]">edit</span>
+          </div>
+          <div class="mt-2 flex items-start gap-1.5 px-2.5 py-1.5 bg-secondary-fixed/50 rounded-lg">
+            <span class="material-symbols-outlined text-tertiary text-[15px] mt-0.5 shrink-0">auto_awesome</span>
+            <p class="text-[11px] text-on-secondary-fixed leading-tight">Updates dashboard greeting &amp; timesheet export headers automatically.</p>
           </div>
         </div>
       </div>
 
-      <!-- Section 1: Default Shift Timings (Item 3) -->
-      <div class="space-y-3">
-        <label class="text-[11px] font-extrabold text-[#8E9AAB] tracking-wider uppercase">DEFAULT SHIFT TIMINGS</label>
-        
+      <!-- Section 2: Preferred Facilities & Units -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-outline-variant/50 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary-container">
+            <span class="material-symbols-outlined text-[18px]">local_hospital</span>
+          </div>
+          <div>
+            <h4 class="font-headline font-bold text-sm text-on-surface">Preferred Facilities &amp; Units</h4>
+            <p class="text-[11px] text-on-surface-variant">Populates the facility selector on shift log</p>
+          </div>
+        </div>
+
+        <!-- Add New Location Input -->
+        <div class="flex gap-2">
+          <input id="new-location-input" type="text" placeholder="e.g. Valley Health — Step Down" class="flex-1 px-3 py-2 bg-surface-container-low rounded-xl text-xs font-semibold outline-none border border-transparent focus:border-primary focus:bg-white transition-all"/>
+          <button onclick="addCustomLocation()" class="px-3 py-2 bg-primary text-white text-xs font-bold rounded-xl active:scale-95 transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">add</span> Add
+          </button>
+        </div>
+
+        <!-- Location Items List -->
+        <div id="location-chips-container" class="space-y-2 pt-1">
+          <!-- Dynamically populated rows -->
+        </div>
+      </div>
+
+      <!-- Section 3: Default Shift Timings -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-outline-variant/50 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+            <span class="material-symbols-outlined text-[18px]">schedule</span>
+          </div>
+          <div>
+            <h4 class="font-headline font-bold text-sm text-on-surface">Default Shift Timings</h4>
+            <p class="text-[11px] text-on-surface-variant">Auto-populates start and end times on shift quick-log</p>
+          </div>
+        </div>
+
         <!-- Day Shift Timing -->
-        <div class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#D97706]"></span>
-            <span class="text-xs font-bold text-[#111827]">Day Shift</span>
+        <div class="p-3 bg-surface-container-low rounded-xl space-y-2 border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-tertiary">light_mode</span>
+              <span class="text-xs font-bold text-on-surface">Day Shift</span>
+            </div>
+            <span class="text-[10px] font-bold text-secondary bg-white px-2 py-0.5 rounded-full border border-outline-variant/40">12.5 hrs</span>
           </div>
-          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-            <input id="cfg-day-start" type="text" value="07:00 AM" class="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-center text-xs outline-none font-bold text-[#1B68F8]"/>
-            <span class="text-slate-400">to</span>
-            <input id="cfg-day-end" type="text" value="07:30 PM" class="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-center text-xs outline-none font-bold text-[#1B68F8]"/>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-white p-2 rounded-lg border border-outline-variant/40">
+              <label class="block text-[9px] uppercase font-bold text-on-surface-variant">Start Time</label>
+              <input id="cfg-day-start" type="text" value="07:00 AM" class="w-full text-xs font-bold text-primary outline-none mt-0.5 bg-transparent"/>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-outline-variant/40">
+              <label class="block text-[9px] uppercase font-bold text-on-surface-variant">End Time</label>
+              <input id="cfg-day-end" type="text" value="07:30 PM" class="w-full text-xs font-bold text-primary outline-none mt-0.5 bg-transparent"/>
+            </div>
           </div>
         </div>
 
         <!-- Evening Shift Timing -->
-        <div class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#9333EA]"></span>
-            <span class="text-xs font-bold text-[#111827]">Evening Shift</span>
+        <div class="p-3 bg-surface-container-low rounded-xl space-y-2 border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-secondary">wb_twilight</span>
+              <span class="text-xs font-bold text-on-surface">Evening Shift</span>
+            </div>
+            <span class="text-[10px] font-bold text-secondary bg-white px-2 py-0.5 rounded-full border border-outline-variant/40">8.5 hrs</span>
           </div>
-          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-            <input id="cfg-eve-start" type="text" value="03:00 PM" class="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-center text-xs outline-none font-bold text-[#1B68F8]"/>
-            <span class="text-slate-400">to</span>
-            <input id="cfg-eve-end" type="text" value="11:30 PM" class="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-center text-xs outline-none font-bold text-[#1B68F8]"/>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-white p-2 rounded-lg border border-outline-variant/40">
+              <label class="block text-[9px] uppercase font-bold text-on-surface-variant">Start Time</label>
+              <input id="cfg-eve-start" type="text" value="03:00 PM" class="w-full text-xs font-bold text-primary outline-none mt-0.5 bg-transparent"/>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-outline-variant/40">
+              <label class="block text-[9px] uppercase font-bold text-on-surface-variant">End Time</label>
+              <input id="cfg-eve-end" type="text" value="11:30 PM" class="w-full text-xs font-bold text-primary outline-none mt-0.5 bg-transparent"/>
+            </div>
           </div>
         </div>
 
         <!-- Night Shift Timing -->
-        <div class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#4F46E5]"></span>
-            <span class="text-xs font-bold text-[#111827]">Night Shift</span>
+        <div class="p-3 bg-surface-container-low rounded-xl space-y-2 border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-primary">bedtime</span>
+              <span class="text-xs font-bold text-on-surface">Night Shift</span>
+            </div>
+            <span class="text-[10px] font-bold text-secondary bg-white px-2 py-0.5 rounded-full border border-outline-variant/40">12.0 hrs</span>
           </div>
-          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-            <input id="cfg-night-start" type="text" value="07:00 PM" class="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-center text-xs outline-none font-bold text-[#1B68F8]"/>
-            <span class="text-slate-400">to</span>
-            <input id="cfg-night-end" type="text" value="07:00 AM" class="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-center text-xs outline-none font-bold text-[#1B68F8]"/>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-white p-2 rounded-lg border border-outline-variant/40">
+              <label class="block text-[9px] uppercase font-bold text-on-surface-variant">Start Time</label>
+              <input id="cfg-night-start" type="text" value="07:00 PM" class="w-full text-xs font-bold text-primary outline-none mt-0.5 bg-transparent"/>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-outline-variant/40">
+              <label class="block text-[9px] uppercase font-bold text-on-surface-variant">End Time</label>
+              <input id="cfg-night-end" type="text" value="07:00 AM" class="w-full text-xs font-bold text-primary outline-none mt-0.5 bg-transparent"/>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Section 2: Manage Saved Locations (Item 4) -->
-      <div class="space-y-3 pt-2">
-        <label class="text-[11px] font-extrabold text-[#8E9AAB] tracking-wider uppercase">MANAGE LOCATIONS</label>
-        
-        <!-- Add New Location Input -->
-        <div class="flex gap-2">
-          <input id="new-location-input" type="text" placeholder="Add custom facility (e.g. ICU, Clinic B)" class="flex-1 px-4 py-2.5 bg-[#F4F6F9] rounded-xl text-xs font-semibold outline-none border border-transparent focus:border-[#1B68F8] focus:bg-white transition-all"/>
-          <button onclick="addCustomLocation()" class="px-4 py-2.5 bg-[#1B68F8] text-white text-xs font-bold rounded-xl active:scale-95 transition-all">Add</button>
-        </div>
-
-        <!-- Location Chips List -->
-        <div id="location-chips-container" class="flex flex-wrap gap-2 pt-1">
-          <!-- Dynamically populated chips -->
-        </div>
-      </div>
-
-      <!-- Save & Apply Button -->
-      <button onclick="saveSettings()" class="w-full py-3.5 bg-gradient-to-b from-[#246CF9] to-[#0B4FD9] text-white font-extrabold text-sm rounded-2xl custom-glow active:scale-[0.98] transition-all">
-        Save Preferences
+      <!-- Save All Preferences CTA Button -->
+      <button onclick="saveSettings()" class="w-full py-3.5 bg-primary hover:bg-primary-container text-white font-bold text-sm rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">check_circle</span>
+        Save All Preferences
       </button>
     </div>
   </div>
 
   <!-- Screen Content Viewport -->
-  <main class="flex-1 max-w-md w-full mx-auto px-5 pt-4 pb-28">
+  <main class="flex-1 max-w-md w-full mx-auto px-4 pt-3 pb-24">
 
-    <!-- ================= SCREEN 1: DASHBOARD ================= -->
-    <div id="screen-0" class="space-y-5 transition-opacity duration-200">
+    <!-- ================= SCREEN 1: DASHBOARD (Shift Log) ================= -->
+    <div id="screen-0" class="space-y-4 transition-opacity duration-200">
       
-      <!-- Top Header with Tappable Profile Icon (Item 3 & 4) -->
-      <div class="flex items-center justify-between pt-1">
-        <div class="flex items-center gap-3.5">
-          <!-- Tappable Nurse Profile Icon -->
-          <button onclick="openSettings()" title="Tap to open Settings" class="relative group active:scale-95 transition-transform">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#EBF3FF] to-[#D5E6FF] border-2 border-white shadow-sm flex items-center justify-center text-[#1B68F8] ring-1 ring-blue-100">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2a5 5 0 0 0-5 5v1.2a7 7 0 0 0 10 0V7a5 5 0 0 0-5-5zm0 2a3 3 0 0 1 3 3v1a5 5 0 0 1-6 0V7a3 3 0 0 1 3-3zm-7 15c0-2.67 5.33-4 7-4s7 1.33 7 4v2H5v-2zm2.5 0c1.07-.63 3.12-1 4.5-1s3.43.37 4.5 1h-9z"/>
-                <path d="M10 6.5h4v1h-4z"/>
-                <path d="M11.5 5h1v4h-1z"/>
-              </svg>
-            </div>
-            <!-- Small gear badge indicator -->
-            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[#1B68F8] text-white rounded-full flex items-center justify-center border border-white">
-              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-            </div>
-          </button>
-          <div>
-            <div class="text-[18px] font-extrabold text-[#111827] leading-tight">Welcome,</div>
-            <div id="nurse-name-display" class="text-[18px] font-extrabold text-[#1B68F8] leading-tight">Nurse Sarah</div>
+      <!-- Brand Header matching Stitch Screen 1 -->
+      <header class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm overflow-hidden flex-shrink-0">
+            <span class="material-symbols-outlined text-[20px]">spa</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[10px] text-primary tracking-wider uppercase font-bold leading-none mb-0.5">PulseCare Shifts</span>
+            <span class="text-base font-headline font-semibold text-on-surface leading-tight">Shift Log</span>
           </div>
         </div>
-        <button onclick="switchTab(1)" class="w-11 h-11 rounded-2xl bg-[#EBF3FF] flex items-center justify-center text-[#1B68F8] active:bg-blue-100 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div class="flex items-center gap-2">
+          <button aria-label="Notifications" class="bell-icon-hover w-9 h-9 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all active:scale-90">
+            <span class="material-symbols-outlined text-[20px] bell-icon">notifications</span>
+          </button>
+          <button onclick="openSettings()" class="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs active:scale-95 transition-transform" title="Profile &amp; Settings">
+            <span class="material-symbols-outlined text-[18px]">person</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Welcome Card Banner -->
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <span class="text-xs text-on-surface-variant font-medium">Welcome back,</span>
+          <h2 id="nurse-name-display" class="font-headline font-bold text-xl text-on-surface leading-tight">Sarah Jenkins, RN</h2>
+        </div>
+        <button onclick="switchTab(1)" class="w-10 h-10 rounded-xl bg-white border border-outline-variant/50 flex items-center justify-center text-primary shadow-xs active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[20px]">calendar_today</span>
         </button>
       </div>
 
-      <!-- Quick Log Today's Shift Card -->
-      <div class="bg-white rounded-[26px] p-5 card-shadow space-y-4">
-        <!-- Header with Current Date Display (Item 2) -->
-        <div>
-          <h2 class="text-lg font-extrabold text-[#111827] tracking-tight">Quick Log Today's Shift</h2>
-          <!-- Display Current Date (Item 2) -->
-          <div id="quick-log-today-label" class="text-xs font-bold text-[#1B68F8] mt-0.5">Today, Thursday, Sep 24</div>
+      <!-- Quick Log Today's Shift Card (Stitch Screen 1) -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/50 space-y-4">
+        <!-- Header with Current Date Display -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-primary-fixed/50 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[17px]">edit_calendar</span>
+            </div>
+            <h3 class="text-base font-headline font-bold text-on-surface">Quick Log Today's Shift</h3>
+          </div>
+          <div id="quick-log-today-label" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            Today, Oct 26
+          </div>
         </div>
-        
-        <!-- Location Input Field (Item 1: Hybrid Type & Select) -->
+
+        <!-- Location Input Field (Hybrid Type & Select) -->
         <div class="relative">
-          <label class="text-[11px] font-bold text-[#8E9AAB] tracking-wide">Location</label>
-          <div class="relative mt-1.5 flex items-center">
+          <label class="text-[11px] font-bold text-on-surface-variant tracking-wide">Where is your duty?</label>
+          <div class="relative mt-1 flex items-center">
             <input 
               id="location-input" 
               type="text" 
-              value="General Hospital - Ward 4" 
-              placeholder="Type or select facility name" 
+              value="General Hospital — Ward 4 (Acute Care)" 
+              placeholder="Select or enter facility name" 
               oninput="onLocationType(this.value)"
               autocomplete="off"
-              class="w-full pl-4 pr-11 py-3 bg-[#F4F6F9] rounded-xl text-sm font-semibold text-[#111827] placeholder-slate-400 outline-none border border-transparent focus:border-[#1B68F8] focus:bg-white transition-all"
+              class="w-full pl-3.5 pr-10 py-2.5 bg-surface-container-low rounded-xl text-xs font-semibold text-on-surface placeholder-outline outline-none border border-transparent focus:border-primary/50 focus:bg-white transition-all"
             />
             <button 
               type="button" 
               onclick="toggleLocationDropdown()" 
               title="Show saved locations"
-              class="absolute right-2.5 p-1.5 text-[#8E9AAB] hover:text-[#1B68F8] transition-colors rounded-lg active:scale-95"
+              class="absolute right-2.5 p-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg active:scale-95"
             >
-              <svg id="loc-dropdown-chevron" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+              <span id="loc-dropdown-chevron" class="material-symbols-outlined text-[18px] transition-transform duration-200">expand_more</span>
             </button>
           </div>
 
           <!-- Hybrid Dropdown List for Quick Selection -->
-          <div id="location-dropdown" class="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 hidden overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto">
+          <div id="location-dropdown" class="absolute left-0 right-0 top-full mt-1.5 bg-white border border-outline-variant/60 rounded-xl shadow-xl z-30 hidden overflow-hidden divide-y divide-surface-container max-h-48 overflow-y-auto">
             <!-- Dynamically populated -->
           </div>
         </div>
 
-        <!-- Shift Type Toggle: Adjusted for clarity REMOVED (Item 1) -->
+        <!-- Shift Type 3-Segment Toggle with Weather Icons -->
         <div>
-          <div class="text-[11px] font-bold text-[#8E9AAB]">Shift Type</div>
-          <div class="mt-1.5 p-1 bg-[#EFF2F6] rounded-xl flex gap-1">
-            <button id="shift-day-btn" onclick="setShiftType('day')" class="flex-1 py-2 text-xs font-black rounded-lg transition-all duration-200 bg-white text-[#1B68F8] shadow-sm">Day</button>
-            <button id="shift-evening-btn" onclick="setShiftType('evening')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-[#111827]">Evening</button>
-            <button id="shift-night-btn" onclick="setShiftType('night')" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-[#111827]">Night</button>
+          <div class="text-[11px] font-bold text-on-surface-variant mb-1">Shift Type</div>
+          <div class="p-1 bg-surface-container-low rounded-xl flex gap-1">
+            <button id="shift-day-btn" onclick="setShiftType('day')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 bg-primary text-white shadow-xs flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">wb_sunny</span> Day
+            </button>
+            <button id="shift-evening-btn" onclick="setShiftType('evening')" class="flex-1 py-2 text-xs font-medium rounded-lg transition-all duration-200 text-on-surface hover:text-primary flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">wb_twilight</span> Evening
+            </button>
+            <button id="shift-night-btn" onclick="setShiftType('night')" class="flex-1 py-2 text-xs font-medium rounded-lg transition-all duration-200 text-on-surface hover:text-primary flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">bedtime</span> Night
+            </button>
           </div>
         </div>
 
-        <!-- Start & End Time Pickers -->
+        <!-- Dual Rolling Time Pickers -->
         <div class="grid grid-cols-2 gap-3">
-          <div onclick="editTime('start')" class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl active:bg-slate-100 transition-colors cursor-pointer">
-            <div class="text-[11px] font-bold text-[#8E9AAB]">Start Time</div>
+          <div onclick="editTime('start')" class="p-3 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/30 transition-colors cursor-pointer">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Start Time</div>
             <div class="flex items-baseline justify-between mt-1">
-              <span id="start-time-val" class="text-2xl font-black text-[#111827] tracking-tight">07:00</span>
-              <span id="start-time-period" class="text-xs font-extrabold text-[#1B68F8]">AM</span>
+              <span id="start-time-val" class="text-xl font-headline font-bold text-on-surface">07:00</span>
+              <span id="start-time-period" class="text-xs font-bold text-primary">AM</span>
             </div>
           </div>
-          <div onclick="editTime('end')" class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl active:bg-slate-100 transition-colors cursor-pointer">
-            <div class="text-[11px] font-bold text-[#8E9AAB]">End Time</div>
+          <div onclick="editTime('end')" class="p-3 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/30 transition-colors cursor-pointer">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">End Time</div>
             <div class="flex items-baseline justify-between mt-1">
-              <span id="end-time-val" class="text-2xl font-black text-[#111827] tracking-tight">07:30</span>
-              <span id="end-time-period" class="text-xs font-extrabold text-[#1B68F8]">PM</span>
+              <span id="end-time-val" class="text-xl font-headline font-bold text-on-surface">07:30</span>
+              <span id="end-time-period" class="text-xs font-bold text-primary">PM</span>
             </div>
           </div>
         </div>
 
-        <!-- Log Shift Button -->
-        <button onclick="triggerLogShift()" class="w-full h-12 bg-gradient-to-b from-[#246CF9] to-[#0B4FD9] text-white font-extrabold text-sm rounded-2xl custom-glow active:scale-[0.98] transition-all">
-          Log Shift
+        <!-- Log Shift Button with Shimmer -->
+        <button onclick="triggerLogShift()" class="w-full h-12 bg-primary hover:bg-primary-container text-white font-bold text-sm rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative overflow-hidden group">
+          <div class="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 animate-shimmer pointer-events-none"></div>
+          <span class="material-symbols-outlined text-[20px]">add_task</span>
+          <span class="relative z-10">Log Shift</span>
         </button>
       </div>
 
       <!-- "Mark Time Off" Section -->
-      <div class="bg-white rounded-[26px] p-5 card-shadow space-y-3.5">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/50 space-y-3.5">
         <div>
-          <h2 class="text-lg font-extrabold text-[#111827] tracking-tight">Mark Time Off</h2>
-          <p class="text-xs text-[#8E9AAB] font-medium mt-0.5">Record scheduled rest days and recovery</p>
+          <h3 class="text-base font-headline font-bold text-on-surface">Mark Time Off</h3>
+          <p class="text-xs text-on-surface-variant font-medium mt-0.5">Record scheduled rest days and recovery</p>
         </div>
 
         <!-- Two Selectable Off-Duty Types -->
-        <div class="grid grid-cols-2 gap-3 pt-1">
-          <div id="offduty-opt-day" onclick="selectOffDuty('day')" class="p-3.5 bg-white border-2 border-[#1B68F8] rounded-2xl card-shadow cursor-pointer transition-all">
+        <div class="grid grid-cols-2 gap-3 pt-0.5">
+          <div id="offduty-opt-day" onclick="selectOffDuty('day')" class="p-3.5 bg-white border-2 border-primary rounded-xl cursor-pointer transition-all shadow-xs">
             <div class="flex items-center justify-between">
-              <div class="w-9 h-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center text-[#059669]">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                <span class="material-symbols-outlined text-[18px]">coffee</span>
               </div>
-              <div id="check-offduty" class="w-5 h-5 rounded-full bg-[#1B68F8] flex items-center justify-center text-white">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <div id="check-offduty" class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-white">
+                <span class="material-symbols-outlined text-[13px]">check</span>
               </div>
             </div>
-            <div class="font-extrabold text-sm text-[#111827] mt-2.5">Off Duty</div>
-            <div class="text-[11px] text-[#8E9AAB] font-medium">Full Day Off</div>
+            <div class="font-bold text-sm text-on-surface mt-2">Off Duty</div>
+            <div class="text-[11px] text-secondary font-medium">Full Day Off</div>
           </div>
 
-          <div id="offduty-opt-night" onclick="selectOffDuty('night')" class="p-3.5 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl cursor-pointer transition-all">
+          <div id="offduty-opt-night" onclick="selectOffDuty('night')" class="p-3.5 bg-surface-container-low border border-transparent rounded-xl cursor-pointer transition-all">
             <div class="flex items-center justify-between">
-              <div class="w-9 h-9 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-[#4F46E5]">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+              <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+                <span class="material-symbols-outlined text-[18px]">nights_stay</span>
               </div>
-              <div id="check-nightoff" class="w-5 h-5 rounded-full border border-slate-300 hidden items-center justify-center text-white">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <div id="check-nightoff" class="w-5 h-5 rounded-full bg-outline-variant/60 hidden items-center justify-center text-transparent">
+                <span class="material-symbols-outlined text-[13px]">check</span>
               </div>
             </div>
-            <div class="font-bold text-sm text-[#64748B] mt-2.5">Night Off</div>
-            <div class="text-[11px] text-[#8E9AAB] font-medium">Scheduled Rest</div>
+            <div class="font-bold text-sm text-secondary mt-2">Night Off</div>
+            <div class="text-[11px] text-on-surface-variant font-medium">Scheduled Rest</div>
           </div>
         </div>
 
-        <button onclick="triggerLogOffDuty()" class="w-full py-2.5 bg-[#F0F5FF] text-[#1B68F8] font-bold text-xs rounded-xl border border-[#D5E6FF] hover:bg-blue-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <button onclick="triggerLogOffDuty()" class="w-full py-2.5 bg-secondary-container/60 text-on-secondary-container hover:bg-secondary-container font-bold text-xs rounded-xl border border-outline-variant/40 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">bedtime</span>
           <span id="log-offduty-btn-text">Log Off Duty for Today</span>
         </button>
       </div>
 
       <!-- Recent Shifts Section -->
       <div>
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-[18px] font-extrabold text-[#111827]">Recent Shifts</h3>
-          <button onclick="switchTab(1)" class="text-xs font-bold text-[#1B68F8]">See all</button>
+        <div class="flex justify-between items-center mb-2.5 px-1">
+          <h3 class="text-base font-headline font-bold text-on-surface">Recent Shifts</h3>
+          <button onclick="switchTab(1)" class="text-xs font-bold text-primary hover:underline">See all</button>
         </div>
-        <div class="space-y-3">
-          <div onclick="switchTab(1)" class="bg-white rounded-2xl p-4 card-shadow flex items-center justify-between active:bg-slate-50 transition-colors cursor-pointer">
-            <div class="flex items-center gap-3.5">
-              <div class="w-11 h-11 rounded-xl bg-[#FFF9E6] flex items-center justify-center text-[#D97706]">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+        <div class="space-y-2.5">
+          <div onclick="switchTab(1)" class="bg-white rounded-xl p-3.5 shadow-xs border border-outline-variant/40 flex items-center justify-between active:bg-surface-container-low transition-colors cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">calendar_today</span>
               </div>
               <div>
-                <div class="font-extrabold text-sm text-[#111827]">Oct 26, 2023</div>
-                <div class="text-xs text-[#8E9AAB] font-medium mt-0.5">Day Shift • 12.5 hrs</div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-sm text-on-surface">Oct 26, 2023</span>
+                  <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold">
+                    <span class="material-symbols-outlined text-[10px]">verified</span> Verified
+                  </span>
+                </div>
+                <div class="text-xs text-on-surface-variant font-medium mt-0.5">Day Shift • 12.0 hrs</div>
               </div>
             </div>
-            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            <span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
           </div>
-          <div onclick="switchTab(1)" class="bg-white rounded-2xl p-4 card-shadow flex items-center justify-between active:bg-slate-50 transition-colors cursor-pointer">
-            <div class="flex items-center gap-3.5">
-              <div class="w-11 h-11 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-[#4F46E5]">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+
+          <div onclick="switchTab(1)" class="bg-white rounded-xl p-3.5 shadow-xs border border-outline-variant/40 flex items-center justify-between active:bg-surface-container-low transition-colors cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-secondary-container/40 flex items-center justify-center text-secondary">
+                <span class="material-symbols-outlined text-[20px]">calendar_today</span>
               </div>
               <div>
-                <div class="font-extrabold text-sm text-[#111827]">Oct 25, 2023</div>
-                <div class="text-xs text-[#8E9AAB] font-medium mt-0.5">Night Shift • 12 hrs</div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-sm text-on-surface">Oct 25, 2023</span>
+                  <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold">
+                    <span class="material-symbols-outlined text-[10px]">verified</span> Verified
+                  </span>
+                </div>
+                <div class="text-xs text-on-surface-variant font-medium mt-0.5">Night Shift • 12.0 hrs</div>
               </div>
             </div>
-            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            <span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ================= SCREEN 2: CALENDAR (Dynamic Navigation - Item 5) ================= -->
-    <div id="screen-1" class="space-y-5 hidden transition-opacity duration-200">
-      <!-- Dynamic Month Navigation Header -->
-      <div class="flex items-center justify-between px-1 pt-1">
-        <button onclick="navigateCalendarMonth(-1)" class="p-2 text-slate-700 active:text-black">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+    <!-- ================= SCREEN 2: CALENDAR ================= -->
+    <div id="screen-1" class="space-y-4 hidden transition-opacity duration-200">
+      
+      <!-- Top Header matching Stitch Screen 2 -->
+      <header class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-[20px]">spa</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[10px] text-primary tracking-wider uppercase font-bold leading-none mb-0.5">Terra Health</span>
+            <span class="text-base font-headline font-semibold text-on-surface leading-tight">Shift Calendar</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openSettings()" class="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs" title="Profile">
+            <span class="material-symbols-outlined text-[18px]">person</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Month Navigation Card -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-outline-variant/50 flex items-center justify-between">
+        <button onclick="navigateCalendarMonth(-1)" class="w-9 h-9 rounded-xl hover:bg-surface-container-low flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[22px]">chevron_left</span>
         </button>
-        <span id="calendar-header-title" class="text-xl font-black text-[#111827]">October 2023</span>
-        <button onclick="navigateCalendarMonth(1)" class="p-2 text-slate-700 active:text-black">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        <div class="flex flex-col items-center">
+          <span id="calendar-header-title" class="font-headline font-bold text-base text-on-surface">October 2023</span>
+          <span class="text-[11px] font-semibold text-primary">Monthly Schedule</span>
+        </div>
+        <button onclick="navigateCalendarMonth(1)" class="w-9 h-9 rounded-xl hover:bg-surface-container-low flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[22px]">chevron_right</span>
         </button>
       </div>
 
-      <!-- Dynamic Calendar Month Grid Card -->
-      <div class="bg-white rounded-[26px] p-5 card-shadow">
-        <!-- Weekdays Row -->
-        <div class="grid grid-cols-7 text-center text-xs font-bold text-[#8E9AAB] mb-4">
-          <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      <!-- Total Hours Banner Pill -->
+      <div class="bg-surface-container-low border border-outline-variant/40 rounded-full px-4 py-2 flex items-center justify-center gap-2 text-xs font-bold text-primary">
+        <span class="material-symbols-outlined text-[17px]">timelapse</span>
+        <span id="calendar-summary-hours-pill">114.5 Total Hours Logged • 11 Shifts</span>
+      </div>
+
+      <!-- Calendar Month Grid Card -->
+      <div class="bg-white rounded-2xl p-4.5 shadow-sm border border-outline-variant/50">
+        <!-- Monday-First Weekday Headers -->
+        <div class="grid grid-cols-7 text-center text-xs font-bold text-on-surface-variant mb-3">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
         </div>
 
         <!-- Days Grid (Dynamically rendered by renderCalendarGrid) -->
-        <div id="calendar-grid-cells" class="grid grid-cols-7 gap-y-2 text-center text-sm font-semibold">
+        <div id="calendar-grid-cells" class="grid grid-cols-7 gap-y-2 text-center text-xs font-semibold">
           <!-- Injected dynamically by JS -->
         </div>
       </div>
 
-      <!-- Shift Detail Card -->
-      <div class="bg-white rounded-[26px] p-5 card-shadow space-y-4">
+      <!-- Selected Date Shift Detail Card -->
+      <div class="bg-white rounded-2xl p-4.5 shadow-sm border border-outline-variant/50 space-y-3.5">
         <div class="flex justify-between items-center">
           <div>
-            <div id="detail-date" class="text-[18px] font-extrabold text-[#111827]">Sunday, Oct 15</div>
-            <div id="detail-count" class="text-xs text-[#8E9AAB] font-medium mt-0.5">1 Shift Logged</div>
+            <div id="detail-date" class="text-base font-headline font-bold text-on-surface">Sunday, Oct 15</div>
+            <div id="detail-count" class="text-xs text-primary font-semibold mt-0.5">1 Shift Logged</div>
           </div>
-          <button onclick="shareShift()" class="w-11 h-11 rounded-full bg-[#EBF3FF] flex items-center justify-center text-[#1B68F8] active:bg-blue-100 transition-colors">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg>
+          <button onclick="shareShift()" class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-primary hover:bg-primary-fixed/40 transition-colors" title="Share shift">
+            <span class="material-symbols-outlined text-[18px]">share</span>
           </button>
         </div>
 
-        <div class="p-4 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl bg-[#1B68F8] flex items-center justify-center text-white shadow-sm">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+        <div class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-xs">
+              <span class="material-symbols-outlined text-[20px]">local_hospital</span>
+            </div>
+            <div>
+              <div id="detail-title" class="font-bold text-xs text-on-surface">12-hour Day Shift</div>
+              <div id="detail-facility" class="text-[11px] text-on-surface-variant mt-0.5 truncate max-w-[170px]">General Hospital — Ward 4</div>
+              <div id="detail-time" class="text-[11px] font-bold text-primary mt-0.5">07:00 AM – 07:00 PM</div>
+            </div>
           </div>
-          <div>
-            <div id="detail-title" class="font-extrabold text-sm text-[#111827]">12-hour Day Shift</div>
-            <div id="detail-facility" class="text-xs text-[#8E9AAB] font-medium mt-0.5">General Hospital - Ward 4</div>
-            <div id="detail-time" class="text-xs font-bold text-[#1B68F8] mt-0.5">07:00 AM - 07:00 PM</div>
-          </div>
+          <span class="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">12.0h</span>
         </div>
       </div>
 
-      <!-- Shift Data Summary Section (Item 4) -->
-      <div class="bg-white rounded-[26px] p-5 card-shadow space-y-4">
+      <!-- Shift Data Summary Section -->
+      <div class="bg-white rounded-2xl p-4.5 shadow-sm border border-outline-variant/50 space-y-3">
         <div class="flex justify-between items-center">
-          <div>
-            <div class="text-[18px] font-extrabold text-[#111827]">Shift Data Summary</div>
-            <div id="calendar-summary-period" class="text-xs text-[#8E9AAB] font-medium mt-0.5">October 2023 Overview</div>
-          </div>
-          <div class="w-10 h-10 rounded-2xl bg-[#EBF3FF] flex items-center justify-center text-[#1B68F8]">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
+          <h4 class="text-sm font-headline font-bold text-on-surface">Shift Data Summary</h4>
+          <span id="calendar-summary-period" class="text-xs text-on-surface-variant font-medium">October 2023 Overview</span>
         </div>
 
-        <!-- Total Hours Done Highlight Card -->
-        <div class="p-4 bg-gradient-to-r from-[#F0F5FF] to-[#E8F1FF] border border-[#DCE8FD] rounded-2xl flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#1B68F8] text-white flex items-center justify-center shadow-sm">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                <polyline points="12 6 12 12 16 14" stroke-width="2"/>
-              </svg>
-            </div>
-            <div>
-              <div class="text-[11px] font-bold text-[#1B68F8] uppercase tracking-wider">Total Hours Done</div>
-              <div class="text-xs text-slate-500 font-medium">Completed shift duration</div>
-            </div>
+        <!-- Breakdown: Day, Evening, Night -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="p-2.5 bg-surface-container-low rounded-xl text-center">
+            <span class="material-symbols-outlined text-[18px] text-tertiary">wb_sunny</span>
+            <div id="calendar-summary-day" class="text-lg font-bold text-on-surface mt-1">8</div>
+            <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Day</div>
           </div>
-          <div class="text-right">
-            <span id="calendar-summary-hours" class="text-2xl font-black text-[#1B68F8]">114.5</span>
-            <span class="text-xs font-extrabold text-[#1B68F8] ml-0.5">hrs</span>
+          <div class="p-2.5 bg-surface-container-low rounded-xl text-center">
+            <span class="material-symbols-outlined text-[18px] text-secondary">wb_twilight</span>
+            <div id="calendar-summary-evening" class="text-lg font-bold text-on-surface mt-1">0</div>
+            <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Evening</div>
           </div>
-        </div>
-
-        <!-- Shift Types Breakdown (Day, Evening, Night) -->
-        <div class="grid grid-cols-3 gap-2.5 pt-0.5">
-          <!-- Day Shifts -->
-          <div class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl text-center">
-            <div class="w-7 h-7 rounded-lg bg-amber-50 text-[#D97706] mx-auto flex items-center justify-center mb-1.5">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
-            </div>
-            <div id="calendar-summary-day" class="text-xl font-black text-[#111827]">8</div>
-            <div class="text-[10px] font-bold text-[#8E9AAB] uppercase tracking-wider mt-0.5">Day Shifts</div>
-          </div>
-
-          <!-- Evening Shifts -->
-          <div class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl text-center">
-            <div class="w-7 h-7 rounded-lg bg-purple-50 text-[#9333EA] mx-auto flex items-center justify-center mb-1.5">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-            </div>
-            <div id="calendar-summary-evening" class="text-xl font-black text-[#111827]">0</div>
-            <div class="text-[10px] font-bold text-[#8E9AAB] uppercase tracking-wider mt-0.5">Evening</div>
-          </div>
-
-          <!-- Night Shifts -->
-          <div class="p-3 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl text-center">
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-[#4338CA] mx-auto flex items-center justify-center mb-1.5">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-            </div>
-            <div id="calendar-summary-night" class="text-xl font-black text-[#111827]">3</div>
-            <div class="text-[10px] font-bold text-[#8E9AAB] uppercase tracking-wider mt-0.5">Night Shifts</div>
+          <div class="p-2.5 bg-surface-container-low rounded-xl text-center">
+            <span class="material-symbols-outlined text-[18px] text-primary">bedtime</span>
+            <div id="calendar-summary-night" class="text-lg font-bold text-on-surface mt-1">3</div>
+            <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Night</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ================= SCREEN 3: REPORTS (Dynamic Data Linking - Item 6) ================= -->
-    <div id="screen-2" class="space-y-5 hidden transition-opacity duration-200">
-      <!-- Header -->
-      <div class="flex items-center gap-2 pt-1">
-        <button onclick="switchTab(0)" class="p-1 text-slate-700 active:text-black">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+    <!-- ================= SCREEN 3: REPORTS (Stitch Screen 3) ================= -->
+    <div id="screen-2" class="space-y-4 hidden transition-opacity duration-200">
+      
+      <!-- Top Header matching Stitch Screen 3 -->
+      <header class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-[20px]">local_hospital</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[10px] text-primary tracking-wider uppercase font-bold leading-none mb-0.5">PulseCare Shifts</span>
+            <span class="text-base font-headline font-semibold text-on-surface leading-tight">Timesheets</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button aria-label="Notifications" class="bell-icon-hover w-9 h-9 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary transition-all active:scale-90">
+            <span class="material-symbols-outlined text-[20px] bell-icon">notifications</span>
+          </button>
+          <button onclick="openSettings()" class="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs" title="Profile">
+            <span class="material-symbols-outlined text-[18px]">person</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Title -->
+      <div>
+        <h2 class="text-xl font-headline font-bold text-on-surface tracking-tight">Generate Timesheets</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">Export shifts and verified clinical hours</p>
+      </div>
+
+      <!-- Scope Selection Cards (Weekly vs Monthly) -->
+      <div class="grid grid-cols-2 gap-3" role="radiogroup">
+        <!-- Weekly Card -->
+        <button id="report-weekly-card" onclick="setReportType('weekly')" class="flex flex-col text-left p-3.5 rounded-2xl bg-white border border-outline-variant/50 text-on-surface transition-all duration-200 active:scale-[0.98] shadow-xs relative overflow-hidden group">
+          <div class="flex items-center justify-between w-full mb-1">
+            <span class="text-xs text-on-surface-variant uppercase tracking-wider font-bold">Weekly</span>
+            <span id="weekly-radio-icon" class="material-symbols-outlined text-[18px] text-outline">radio_button_unchecked</span>
+          </div>
+          <span class="text-xs font-bold text-on-surface truncate">Oct 23 – 29</span>
+          <div class="flex items-baseline gap-1 mt-1.5">
+            <span id="weekly-hours-txt" class="text-xl font-bold text-primary">36.0</span>
+            <span class="text-xs text-on-surface-variant">hrs</span>
+          </div>
+          <span class="text-xs text-secondary font-medium mt-1">3 Shifts</span>
         </button>
-        <span class="text-xl font-black text-[#111827]">Generate Timesheets</span>
+
+        <!-- Monthly Card -->
+        <button id="report-monthly-card" onclick="setReportType('monthly')" class="flex flex-col text-left p-3.5 rounded-2xl bg-primary text-white transition-all duration-200 active:scale-[0.98] shadow-sm relative overflow-hidden ring-2 ring-primary/20">
+          <div class="flex items-center justify-between w-full mb-1">
+            <span class="text-xs text-primary-fixed uppercase tracking-wider font-bold">Monthly Period</span>
+            <span id="monthly-radio-icon" class="material-symbols-outlined text-[18px] text-primary-fixed fill">check_circle</span>
+          </div>
+          <span class="text-xs font-bold text-white truncate">October 2023</span>
+          <div class="flex items-baseline gap-1 mt-1.5">
+            <span class="text-xl font-bold text-white">168.0</span>
+            <span class="text-xs text-primary-fixed">hrs total</span>
+          </div>
+          <span class="text-xs text-primary-fixed/90 font-medium mt-1">Fully Verified</span>
+        </button>
       </div>
 
-      <!-- Frequency Cards (Linked to Preview & Download) -->
-      <div class="grid grid-cols-2 gap-3.5">
-        <!-- Weekly (Active by default) -->
-        <div id="report-weekly-card" onclick="setReportType('weekly')" class="p-4 bg-white border-2 border-[#1B68F8] rounded-[22px] card-shadow cursor-pointer flex flex-col items-center text-center">
-          <div class="w-11 h-11 rounded-xl bg-[#EBF3FF] flex items-center justify-center text-[#1B68F8] mb-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div class="font-black text-sm text-[#111827]">Weekly<br>Report</div>
-          <div class="text-[10px] font-bold text-[#8E9AAB] mt-1.5 tracking-wider uppercase">OCT 23 - OCT 29</div>
-        </div>
-
-        <!-- Monthly -->
-        <div id="report-monthly-card" onclick="setReportType('monthly')" class="p-4 bg-[#F8FAFC] border border-[#F1F4F8] rounded-[22px] cursor-pointer flex flex-col items-center text-center">
-          <div class="w-11 h-11 rounded-xl bg-[#F1F4F8] flex items-center justify-center text-[#8E9AAB] mb-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div class="font-bold text-sm text-[#64748B]">Monthly<br>Report</div>
-          <div class="text-[10px] font-bold text-[#8E9AAB] mt-1.5 tracking-wider uppercase">OCTOBER 2023</div>
-        </div>
-      </div>
-
-      <!-- SELECT FORMAT -->
-      <div>
-        <div class="text-[11px] font-extrabold text-[#8E9AAB] tracking-wider uppercase mb-2.5">SELECT FORMAT</div>
-        <div class="grid grid-cols-2 gap-3.5">
-          <button id="fmt-pdf" onclick="setFormat('pdf')" class="h-14 bg-white border-2 border-[#1B68F8] rounded-2xl flex items-center justify-center gap-2 card-shadow">
-            <div class="w-6 h-6 rounded flex items-center justify-center text-[#EF4444] font-black text-xs">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+      <!-- SELECT FORMAT (PDF / CSV) -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-on-surface flex items-center justify-between">
+          <span>Export Format</span>
+          <span class="text-[11px] font-medium text-on-surface-variant">Select destination</span>
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <!-- PDF Option -->
+          <button id="fmt-pdf" onclick="setFormat('pdf')" class="flex flex-col p-3 rounded-2xl bg-white border border-outline-variant/50 text-on-surface transition-all active:scale-[0.97] text-left">
+            <div class="flex items-center justify-between w-full mb-2">
+              <div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-error">
+                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+              </div>
+              <span id="badge-pdf" class="w-4 h-4 rounded-full bg-outline-variant/60 flex items-center justify-center text-transparent">
+                <span class="material-symbols-outlined text-[12px]">check</span>
+              </span>
             </div>
-            <span class="font-extrabold text-sm text-[#111827]">PDF</span>
+            <span class="text-xs font-bold text-on-surface">PDF Timesheet</span>
+            <span class="text-[10px] text-on-surface-variant mt-0.5">Official Summary</span>
           </button>
-          <button id="fmt-csv" onclick="setFormat('csv')" class="h-14 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center justify-center gap-2">
-            <div class="w-6 h-6 rounded flex items-center justify-center text-[#10B981] font-black text-xs">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v1H4zm7 0v-1h5v1h-5zm-7-3V9h5v1H4zm7 0V9h5v1h-5z" clip-rule="evenodd"/></svg>
+
+          <!-- CSV Option -->
+          <button id="fmt-csv" onclick="setFormat('csv')" class="flex flex-col p-3 rounded-2xl bg-white border-2 border-primary text-on-surface transition-all active:scale-[0.97] shadow-xs text-left ring-2 ring-primary/10">
+            <div class="flex items-center justify-between w-full mb-2">
+              <div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">table_chart</span>
+              </div>
+              <span id="badge-csv" class="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-white">
+                <span class="material-symbols-outlined text-[12px]">check</span>
+              </span>
             </div>
-            <span class="font-extrabold text-sm text-[#64748B]">CSV</span>
+            <span class="text-xs font-bold text-on-surface">CSV Export</span>
+            <span class="text-[10px] text-on-surface-variant mt-0.5">Raw Payroll Data</span>
           </button>
         </div>
       </div>
 
-      <!-- DYNAMIC PREVIEW (Linked to Weekly vs Monthly) -->
-      <div>
-        <div class="flex items-center justify-between mb-2.5">
-          <div class="text-[11px] font-extrabold text-[#8E9AAB] tracking-wider uppercase">PREVIEW</div>
-          <span id="preview-shift-count-badge" class="text-xs font-bold text-[#1B68F8]">3 shifts (Weekly)</span>
+      <!-- Live Timesheet Preview (Stitch Screen 3) -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[17px] text-primary">visibility</span>
+            Live Timesheet Preview
+          </span>
+          <span class="text-[10px] font-bold text-primary flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            Auto-Synced
+          </span>
         </div>
-        <div class="bg-white rounded-[22px] p-4.5 card-shadow space-y-3">
-          <!-- Dynamic Staff & Scope Meta Row -->
-          <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-[11px] font-semibold text-[#8E9AAB] px-1">
-            <span>Staff Member: <strong id="preview-staff-name" class="text-[#111827]">Nurse Sarah</strong></span>
-            <span id="preview-period-label" class="font-bold text-[#1B68F8]">OCT 23 - OCT 29</span>
+
+        <div class="rounded-2xl bg-white border border-outline-variant/50 p-3.5 shadow-sm space-y-2.5">
+          <!-- Agency Header -->
+          <div class="bg-surface-container-low rounded-xl p-2.5 flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="text-[10px] text-primary font-bold uppercase tracking-wider">PulseCare Agency Timesheet</span>
+              <span id="preview-staff-name" class="text-xs font-bold text-on-surface truncate">Sarah Jenkins, RN • Lic #RN-99238</span>
+            </div>
+            <div id="preview-cycle-pill" class="px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary text-[10px] font-bold">October</div>
           </div>
 
-          <!-- Headers -->
-          <div class="flex text-xs font-bold text-[#8E9AAB] px-1">
-            <div class="w-20">Date</div>
-            <div class="flex-1">Facility</div>
-            <div>Hours</div>
+          <!-- 3-Metric Summary Bar -->
+          <div class="grid grid-cols-3 gap-1 bg-surface-container/70 py-2 px-2 rounded-xl text-center">
+            <div class="flex flex-col">
+              <span class="text-[10px] text-on-surface-variant font-medium">Pay Cycle</span>
+              <span id="preview-cycle-label" class="text-xs text-on-surface font-bold">Oct 2023</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-on-surface-variant font-medium">Approved</span>
+              <span id="preview-approved-label" class="text-xs text-primary font-bold">14 / 14</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-on-surface-variant font-medium">Total Billable</span>
+              <span id="preview-total-hours" class="text-xs text-primary font-bold">168.0 hrs</span>
+            </div>
           </div>
-          <!-- Dynamic Rows Container -->
-          <div id="preview-rows-container" class="space-y-3 divide-y divide-slate-100">
-            <!-- Injected by updateReportView() -->
-          </div>
-          <!-- Total Hours -->
-          <div class="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs font-extrabold text-[#1B68F8] px-1">
-            <span>Total Hours</span>
-            <span id="preview-total-hours" class="text-sm font-black">32.5</span>
+
+          <!-- Shifts Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant text-[10px] uppercase tracking-wider">
+                  <th class="py-1.5 px-2 rounded-l-lg font-bold">Date</th>
+                  <th class="py-1.5 px-1 font-bold">Facility / Unit</th>
+                  <th class="py-1.5 px-1 text-right font-bold">Hours</th>
+                  <th class="py-1.5 px-2 rounded-r-lg text-right font-bold">Sign-Off</th>
+                </tr>
+              </thead>
+              <tbody id="preview-table-body" class="divide-y divide-surface-container">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       <!-- Download Button -->
-      <button onclick="downloadReport()" class="w-full h-12 bg-gradient-to-b from-[#246CF9] to-[#0B4FD9] text-white font-extrabold text-sm rounded-2xl custom-glow active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        Download Report
+      <button id="btn-download" onclick="triggerDownload()" class="w-full h-12 bg-primary hover:bg-primary-container text-white font-bold text-sm rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative overflow-hidden group">
+        <div class="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 animate-shimmer pointer-events-none"></div>
+        <span class="material-symbols-outlined text-[20px]" id="btn-download-icon">download</span>
+        <span class="relative z-10" id="btn-download-label">Export CSV Raw Data</span>
       </button>
     </div>
 
   </main>
 
-  <!-- Persistent Bottom Navigation Bar -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-3 px-6 z-40 select-none pb-safe">
-    <div class="max-w-md mx-auto flex justify-around items-center">
-      <button onclick="switchTab(0)" id="nav-0" class="flex flex-col items-center text-[#1B68F8]">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
-        <span class="text-[10px] font-black uppercase mt-1 tracking-wider">HOME</span>
+  <!-- Persistent Bottom Navigation Bar matching Stitch Screens -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-surface-container-highest py-2 px-6 z-40 select-none pb-safe">
+    <div class="max-w-md mx-auto flex justify-around items-center h-12">
+      <button onclick="switchTab(0)" id="nav-0" class="flex flex-col items-center text-primary font-bold transition-all active:scale-90">
+        <span class="material-symbols-outlined text-[22px] leading-none">dashboard</span>
+        <span class="text-[10px] font-bold uppercase mt-1 tracking-wider leading-none">Home</span>
       </button>
 
-      <button onclick="switchTab(1)" id="nav-1" class="flex flex-col items-center text-[#8E9AAB]">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-        <span class="text-[10px] font-bold uppercase mt-1 tracking-wider">CALENDAR</span>
+      <button onclick="switchTab(1)" id="nav-1" class="flex flex-col items-center text-secondary font-medium transition-all active:scale-90">
+        <span class="material-symbols-outlined text-[22px] leading-none">calendar_month</span>
+        <span class="text-[10px] uppercase mt-1 tracking-wider leading-none">Calendar</span>
       </button>
 
-      <button onclick="switchTab(2)" id="nav-2" class="flex flex-col items-center text-[#8E9AAB]">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
-        <span class="text-[10px] font-bold uppercase mt-1 tracking-wider">REPORTS</span>
+      <button onclick="switchTab(2)" id="nav-2" class="flex flex-col items-center text-secondary font-medium transition-all active:scale-90">
+        <span class="material-symbols-outlined text-[22px] leading-none">description</span>
+        <span class="text-[10px] uppercase mt-1 tracking-wider leading-none">Reports</span>
       </button>
     </div>
   </nav>
@@ -576,11 +828,10 @@
     // State management
     let activeTab = 0;
     let currentShiftType = 'day';
-    let currentFormat = 'pdf';
-    let currentReportScope = 'weekly';
+    let currentFormat = 'csv';
+    let currentReportScope = 'monthly';
     let currentOffDuty = 'day';
 
-    // Safe localStorage wrapper (compatible with Safari Private Browsing)
     function getStoredItem(key, fallback = null) {
       try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
     }
@@ -591,70 +842,62 @@
       try { localStorage.removeItem(key); } catch (e) {}
     }
 
-    // User Profile Name (Item 2)
-    let nurseName = getStoredItem('nurselog_nurse_name', 'Nurse Sarah');
-
-    // Duplicate Shift Tracking (Item 5)
+    let nurseName = getStoredItem('nurselog_nurse_name', 'Sarah Jenkins, RN');
     let hasShiftToday = false;
+    let calDate = new Date(2023, 9, 1);
 
-    // Calendar dynamic state (Item 5)
-    let calDate = new Date(2023, 9, 1); // Defaults to October 2023 mock base or current real year
-
-    // Shift default timings (Item 3)
     let shiftTimings = {
       day: { start: '07:00 AM', end: '07:30 PM', hours: 12.5 },
       evening: { start: '03:00 PM', end: '11:30 PM', hours: 8.5 },
       night: { start: '07:00 PM', end: '07:00 AM', hours: 12.0 }
     };
 
-    // Saved Locations list (Item 1 & 4)
     let savedLocations = [
-      'General Hospital - Ward 4',
-      "St. Mary's Hospital",
-      'Metro Care Urgent Center',
-      'ICU - Critical Care Unit'
+      'General Hospital — Ward 4 (Acute Care)',
+      'General Hospital — ICU Annex',
+      'St. Jude Medical — Emergency Room',
+      'Mercy Clinic — Outpatient Surgery'
     ];
 
-    // Shift datasets for weekly vs monthly (Item 6)
     const weeklyShiftsData = [
-      { date: 'Oct 26', facility: 'Gen. Hosp', type: 'Day Shift (07:00 AM - 07:30 PM)', hours: 12.0 },
-      { date: 'Oct 25', facility: 'Gen. Hosp', type: 'Night Shift (07:00 PM - 07:00 AM)', hours: 12.0 },
-      { date: 'Oct 23', facility: "St. Mary's", type: 'Day Shift (07:00 AM - 03:30 PM)', hours: 8.5 }
+      { date: 'Oct 26', facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 25', facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 23', facility: 'St. Jude Medical', unit: 'Emergency Room', hours: 12.0 }
     ];
 
     const monthlyShiftsData = [
-      { date: 'Oct 26', facility: 'Gen. Hosp', type: 'Day Shift', hours: 12.0 },
-      { date: 'Oct 25', facility: 'Gen. Hosp', type: 'Night Shift', hours: 12.0 },
-      { date: 'Oct 23', facility: "St. Mary's", type: 'Day Shift', hours: 8.5 },
-      { date: 'Oct 18', facility: 'Gen. Hosp', type: 'Day Shift', hours: 12.0 },
-      { date: 'Oct 17', facility: 'Gen. Hosp', type: 'Night Shift', hours: 12.0 },
-      { date: 'Oct 15', facility: 'Gen. Hosp', type: '12-hour Day Shift', hours: 12.0 },
-      { date: 'Oct 12', facility: "St. Mary's", type: 'Day Shift', hours: 8.5 },
-      { date: 'Oct 10', facility: 'Gen. Hosp', type: 'Day Shift', hours: 12.0 },
-      { date: 'Oct 8',  facility: 'Gen. Hosp', type: 'Night Shift', hours: 12.0 },
-      { date: 'Oct 4',  facility: 'Gen. Hosp', type: 'Day Shift', hours: 12.0 },
-      { date: 'Oct 1',  facility: "St. Mary's", type: 'Day Shift', hours: 11.5 }
+      { date: 'Oct 26', facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 25', facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 22', facility: 'St. Jude Medical', unit: 'Emergency Room', hours: 12.0 },
+      { date: 'Oct 18', facility: 'General Hospital', unit: 'ICU Annex', hours: 12.0 },
+      { date: 'Oct 17', facility: 'General Hospital', unit: 'Ward 4 • Night', hours: 12.0 },
+      { date: 'Oct 15', facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 12', facility: 'Mercy Clinic', unit: 'Outpatient Surgery', hours: 12.0 },
+      { date: 'Oct 10', facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 8',  facility: 'General Hospital', unit: 'ICU Annex', hours: 12.0 },
+      { date: 'Oct 5',  facility: 'St. Jude Medical', unit: 'Emergency Room', hours: 12.0 },
+      { date: 'Oct 4',  facility: 'General Hospital', unit: 'Ward 4 • Day', hours: 12.0 },
+      { date: 'Oct 2',  facility: 'Mercy Clinic', unit: 'Day Shift', hours: 12.0 },
+      { date: 'Oct 1',  facility: 'General Hospital', unit: 'ICU Annex', hours: 12.0 },
+      { date: 'Sep 29', facility: 'St. Jude Medical', unit: 'Emergency Room', hours: 12.0 }
     ];
 
-    // Initialization on load
     window.addEventListener('DOMContentLoaded', () => {
-      // Set dynamic today's date label (Item 2)
       const now = new Date();
-      const options = { weekday: 'long', month: 'short', day: 'numeric' };
+      const options = { month: 'short', day: 'numeric' };
       const dateEl = document.getElementById('quick-log-today-label');
-      if (dateEl) dateEl.textContent = `Today, ${now.toLocaleDateString('en-US', options)}`;
+      if (dateEl) {
+        dateEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> Today, ${now.toLocaleDateString('en-US', options)}`;
+      }
       
-      // Initialize Nurse Name
       const nameInput = document.getElementById('nurse-name-input');
       const nameDisplay = document.getElementById('nurse-name-display');
+      const profileName = document.getElementById('settings-profile-name');
       const previewStaff = document.getElementById('preview-staff-name');
       if (nameInput) nameInput.value = nurseName;
       if (nameDisplay) nameDisplay.textContent = nurseName;
-      if (previewStaff) previewStaff.textContent = nurseName;
-
-      // Enforce Strict Light Mode across application
-      removeStoredItem('nurselog_dark_mode');
-      document.body.classList.remove('dark');
+      if (profileName) profileName.textContent = nurseName;
+      if (previewStaff) previewStaff.textContent = `${nurseName} • Lic #RN-99238`;
 
       renderLocationChips();
       renderLocationDropdown();
@@ -664,7 +907,6 @@
       setupSwipeGestures();
     });
 
-    // Navigation Tabs
     function switchTab(index) {
       activeTab = index;
       for (let i = 0; i < 3; i++) {
@@ -673,29 +915,26 @@
 
         if (i === index) {
           screen.classList.remove('hidden');
-          nav.classList.add('text-[#1B68F8]');
-          nav.classList.remove('text-[#8E9AAB]');
-          nav.querySelector('span').classList.add('font-black');
-          nav.querySelector('span').classList.remove('font-bold');
+          nav.classList.add('text-primary', 'font-bold');
+          nav.classList.remove('text-secondary', 'font-medium');
         } else {
           screen.classList.add('hidden');
-          nav.classList.remove('text-[#1B68F8]');
-          nav.classList.add('text-[#8E9AAB]');
-          nav.querySelector('span').classList.remove('font-black');
-          nav.querySelector('span').classList.add('font-bold');
+          nav.classList.remove('text-primary', 'font-bold');
+          nav.classList.add('text-secondary', 'font-medium');
         }
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ================= SETTINGS & PROFILE (Items 2 & 3) =================
     function updateNurseName(val) {
       const trimmed = val.trim();
-      nurseName = trimmed || 'Nurse Sarah';
+      nurseName = trimmed || 'Sarah Jenkins, RN';
       const displayEl = document.getElementById('nurse-name-display');
       if (displayEl) displayEl.textContent = nurseName;
+      const profileName = document.getElementById('settings-profile-name');
+      if (profileName) profileName.textContent = nurseName;
       const previewStaffEl = document.getElementById('preview-staff-name');
-      if (previewStaffEl) previewStaffEl.textContent = nurseName;
+      if (previewStaffEl) previewStaffEl.textContent = `${nurseName} • Lic #RN-99238`;
       setStoredItem('nurselog_nurse_name', nurseName);
     }
 
@@ -717,7 +956,6 @@
       setTimeout(() => backdrop.classList.add('hidden'), 300);
     }
 
-    // ================= HYBRID LOCATION LOGIC (Item 1) =================
     function toggleLocationDropdown(force) {
       const dropdown = document.getElementById('location-dropdown');
       const chevron = document.getElementById('loc-dropdown-chevron');
@@ -725,11 +963,11 @@
       const isOpen = force !== undefined ? !force : !dropdown.classList.contains('hidden');
       if (isOpen) {
         dropdown.classList.add('hidden');
-        if (chevron) chevron.classList.remove('rotate-180');
+        if (chevron) chevron.textContent = 'expand_more';
       } else {
         renderLocationDropdown();
         dropdown.classList.remove('hidden');
-        if (chevron) chevron.classList.add('rotate-180');
+        if (chevron) chevron.textContent = 'expand_less';
       }
     }
 
@@ -741,7 +979,7 @@
         : savedLocations;
 
       if (filtered.length === 0) {
-        dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 font-medium text-center">No saved locations match "${filter}"</div>`;
+        dropdown.innerHTML = `<div class="p-3 text-xs text-on-surface-variant font-medium text-center">No locations match "${filter}"</div>`;
         return;
       }
 
@@ -750,15 +988,15 @@
       filtered.forEach(loc => {
         const isSelected = loc === currentVal;
         const item = document.createElement('div');
-        item.className = `px-4 py-2.5 flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors ${
-          isSelected ? 'bg-blue-50 text-[#1B68F8]' : 'text-slate-700 hover:bg-slate-50'
+        item.className = `px-3.5 py-2.5 flex items-center justify-between text-xs font-semibold cursor-pointer transition-colors ${
+          isSelected ? 'bg-primary-fixed/30 text-primary' : 'text-on-surface hover:bg-surface-container-low'
         }`;
         item.innerHTML = `
           <div class="flex items-center gap-2 truncate">
-            <svg class="w-3.5 h-3.5 ${isSelected ? 'text-[#1B68F8]' : 'text-slate-400'} flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="2"/></svg>
+            <span class="material-symbols-outlined text-[16px] ${isSelected ? 'text-primary' : 'text-outline'} flex-shrink-0">local_hospital</span>
             <span class="truncate">${loc}</span>
           </div>
-          ${isSelected ? '<svg class="w-4 h-4 text-[#1B68F8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>' : ''}
+          ${isSelected ? '<span class="material-symbols-outlined text-[16px] text-primary">check</span>' : ''}
         `;
         item.onclick = (e) => {
           e.stopPropagation();
@@ -772,7 +1010,6 @@
       const input = document.getElementById('location-input');
       if (input) input.value = loc;
       toggleLocationDropdown(false);
-      renderLocationChips();
       showToast(`Selected: ${loc}`);
     }
 
@@ -781,10 +1018,9 @@
       const dropdown = document.getElementById('location-dropdown');
       const chevron = document.getElementById('loc-dropdown-chevron');
       if (dropdown) dropdown.classList.remove('hidden');
-      if (chevron) chevron.classList.add('rotate-180');
+      if (chevron) chevron.textContent = 'expand_less';
     }
 
-    // Close location dropdown on clicking outside
     document.addEventListener('click', (e) => {
       const container = document.getElementById('location-input')?.parentElement?.parentElement;
       if (container && !container.contains(e.target)) {
@@ -794,29 +1030,25 @@
 
     function renderLocationChips() {
       const container = document.getElementById('location-chips-container');
-      const currentLocation = document.getElementById('location-input')?.value || '';
       if (!container) return;
       container.innerHTML = '';
       savedLocations.forEach((loc, index) => {
-        const isSelected = loc === currentLocation;
-        const chip = document.createElement('div');
-        chip.className = `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
-          isSelected ? 'bg-blue-100 text-[#1B68F8] border border-blue-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-        }`;
-        chip.innerHTML = `
-          <span onclick="selectSavedLocation('${loc}')">${loc}</span>
-          ${savedLocations.length > 1 ? `<span onclick="deleteSavedLocation(${index})" class="text-slate-400 hover:text-red-500 font-black ml-1">&times;</span>` : ''}
+        const isDefault = index === 0;
+        const row = document.createElement('div');
+        row.className = "p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between gap-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xs font-semibold text-on-surface truncate">${loc}</span>
+            ${isDefault ? '<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-[9px] font-bold uppercase tracking-wider shrink-0">Default</span>' : ''}
+          </div>
+          ${savedLocations.length > 1 ? `
+            <button onclick="deleteSavedLocation(${index})" class="text-error hover:bg-error-container/30 p-1 rounded-lg transition-colors">
+              <span class="material-symbols-outlined text-[16px]">delete_outline</span>
+            </button>
+          ` : ''}
         `;
-        container.appendChild(chip);
+        container.appendChild(row);
       });
-    }
-
-    function selectSavedLocation(loc) {
-      const input = document.getElementById('location-input');
-      if (input) input.value = loc;
-      renderLocationChips();
-      renderLocationDropdown();
-      showToast(`Selected location: ${loc}`);
     }
 
     function addCustomLocation() {
@@ -827,7 +1059,7 @@
         input.value = '';
         renderLocationChips();
         renderLocationDropdown();
-        selectSavedLocation(val);
+        showToast(`Added location: ${val}`);
       }
     }
 
@@ -835,10 +1067,10 @@
       savedLocations.splice(idx, 1);
       renderLocationChips();
       renderLocationDropdown();
+      showToast('Location removed');
     }
 
     function saveSettings() {
-      // Save timings
       shiftTimings.day.start = document.getElementById('cfg-day-start').value;
       shiftTimings.day.end = document.getElementById('cfg-day-end').value;
       shiftTimings.evening.start = document.getElementById('cfg-eve-start').value;
@@ -846,17 +1078,14 @@
       shiftTimings.night.start = document.getElementById('cfg-night-start').value;
       shiftTimings.night.end = document.getElementById('cfg-night-end').value;
 
-      // Save nurse name
       const nameInput = document.getElementById('nurse-name-input');
       if (nameInput) updateNurseName(nameInput.value);
 
-      // Re-apply to current active shift
       setShiftType(currentShiftType);
       closeSettings();
-      showToast('Settings & preferences saved!');
+      showToast('Preferences saved successfully!');
     }
 
-    // Shift Type Handler
     function setShiftType(type) {
       currentShiftType = type;
       const dayBtn = document.getElementById('shift-day-btn');
@@ -867,10 +1096,9 @@
       const startPeriod = document.getElementById('start-time-period');
       const endVal = document.getElementById('end-time-val');
       const endPeriod = document.getElementById('end-time-period');
-      const hoursLogged = document.getElementById('hours-logged-text');
 
-      const resetClass = "flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-[#111827]";
-      const activeClass = "flex-1 py-2 text-xs font-black rounded-lg transition-all duration-200 bg-white text-[#1B68F8] shadow-sm";
+      const resetClass = "flex-1 py-2 text-xs font-medium rounded-lg transition-all duration-200 text-on-surface hover:text-primary flex items-center justify-center gap-1.5";
+      const activeClass = "flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 bg-primary text-white shadow-xs flex items-center justify-center gap-1.5";
 
       dayBtn.className = resetClass;
       eveningBtn.className = resetClass;
@@ -892,10 +1120,8 @@
       startPeriod.textContent = startParts[1] || 'AM';
       endVal.textContent = endParts[0];
       endPeriod.textContent = endParts[1] || 'PM';
-      if (hoursLogged) hoursLogged.textContent = `${timing.hours} hours logged.`;
     }
 
-    // Off-Duty Selection
     function selectOffDuty(type) {
       currentOffDuty = type;
       const dayOpt = document.getElementById('offduty-opt-day');
@@ -905,14 +1131,14 @@
       const btnText = document.getElementById('log-offduty-btn-text');
 
       if (type === 'day') {
-        dayOpt.className = "p-3.5 bg-white border-2 border-[#1B68F8] rounded-2xl card-shadow cursor-pointer transition-all";
-        nightOpt.className = "p-3.5 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl cursor-pointer transition-all";
+        dayOpt.className = "p-3.5 bg-white border-2 border-primary rounded-xl cursor-pointer transition-all shadow-xs";
+        nightOpt.className = "p-3.5 bg-surface-container-low border border-transparent rounded-xl cursor-pointer transition-all";
         checkDay.classList.remove('hidden');
         checkNight.classList.add('hidden');
         btnText.textContent = "Log Off Duty for Today";
       } else {
-        nightOpt.className = "p-3.5 bg-white border-2 border-[#1B68F8] rounded-2xl card-shadow cursor-pointer transition-all";
-        dayOpt.className = "p-3.5 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl cursor-pointer transition-all";
+        nightOpt.className = "p-3.5 bg-white border-2 border-primary rounded-xl cursor-pointer transition-all shadow-xs";
+        dayOpt.className = "p-3.5 bg-surface-container-low border border-transparent rounded-xl cursor-pointer transition-all";
         checkNight.classList.remove('hidden');
         checkDay.classList.add('hidden');
         btnText.textContent = "Log Night Off for Today";
@@ -934,9 +1160,8 @@
       }
     }
 
-    // ================= DUPLICATE SHIFT WARNING (Item 5) =================
     function triggerLogShift() {
-      const loc = document.getElementById('location-input')?.value.trim() || 'General Hospital - Ward 4';
+      const loc = document.getElementById('location-input')?.value.trim() || 'General Hospital';
       if (hasShiftToday) {
         openDuplicateModal();
       } else {
@@ -948,7 +1173,7 @@
         monthlyShiftsData.unshift({
           date: `${monthShort} ${now.getDate()}`,
           facility: loc,
-          type: typeLabel,
+          unit: typeLabel,
           hours: hours
         });
         updateCalendarSummary();
@@ -981,7 +1206,7 @@
 
     function confirmOverwriteShift() {
       closeDuplicateModal();
-      const loc = document.getElementById('location-input')?.value.trim() || 'General Hospital - Ward 4';
+      const loc = document.getElementById('location-input')?.value.trim() || 'General Hospital';
       hasShiftToday = true;
       const now = new Date();
       const monthShort = now.toLocaleDateString('en-US', { month: 'short' });
@@ -990,7 +1215,7 @@
       monthlyShiftsData.unshift({
         date: `${monthShort} ${now.getDate()}`,
         facility: loc,
-        type: typeLabel,
+        unit: typeLabel,
         hours: hours
       });
       updateCalendarSummary();
@@ -998,7 +1223,6 @@
       showToast(`Shift updated at ${loc}! 🎉`);
     }
 
-    // ================= SWIPE NAVIGATION ENGINE (Item 4) =================
     function setupSwipeGestures() {
       let touchStartX = 0;
       let touchStartY = 0;
@@ -1013,20 +1237,16 @@
       mainEl.addEventListener('touchend', (e) => {
         const diffX = e.changedTouches[0].screenX - touchStartX;
         const diffY = e.changedTouches[0].screenY - touchStartY;
-        // Check for distinct horizontal swipe
         if (Math.abs(diffX) > 55 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
           if (diffX < 0 && activeTab < 2) {
-            // Swipe Left -> Next Tab
             switchTab(activeTab + 1);
           } else if (diffX > 0 && activeTab > 0) {
-            // Swipe Right -> Previous Tab
             switchTab(activeTab - 1);
           }
         }
       }, { passive: true });
     }
 
-    // ================= DYNAMIC CALENDAR ENGINE (Item 5) =================
     function navigateCalendarMonth(direction) {
       calDate.setMonth(calDate.getMonth() + direction);
       renderCalendarGrid();
@@ -1038,49 +1258,47 @@
       const monthTitle = calDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       document.getElementById('calendar-header-title').textContent = monthTitle;
 
-      const firstWeekday = new Date(year, month, 1).getDay(); // 0 = Sun
+      // Monday-first weekday math: (0=Sun -> 6, 1=Mon -> 0)
+      const firstDaySundayBased = new Date(year, month, 1).getDay();
+      const firstWeekday = (firstDaySundayBased + 6) % 7; 
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const daysInPrevMonth = new Date(year, month, 0).getDate();
 
       const grid = document.getElementById('calendar-grid-cells');
       grid.innerHTML = '';
 
-      // Leading days
       for (let i = firstWeekday - 1; i >= 0; i--) {
         const d = daysInPrevMonth - i;
         const cell = document.createElement('span');
-        cell.className = "text-slate-300 py-1.5";
+        cell.className = "text-outline-variant py-2";
         cell.textContent = d;
         grid.appendChild(cell);
       }
 
-      // Shift indicator days
-      const loggedDays = [1, 4, 8, 10, 12, 15, 17, 18, 23, 25, 26];
+      const loggedDays = [1, 2, 4, 5, 8, 10, 12, 15, 17, 18, 22, 25, 26];
 
-      // Current month days
       for (let day = 1; day <= daysInMonth; day++) {
         const btn = document.createElement('button');
         const hasShift = loggedDays.includes(day);
         const isDay15 = (day === 15);
 
         if (isDay15) {
-          btn.className = "cal-cell py-1.5 bg-[#1B68F8] text-white rounded-xl font-black shadow-md flex flex-col items-center justify-center";
-          btn.innerHTML = `<span class="leading-none text-base">${day}</span><span class="w-1 h-1 bg-white rounded-full mt-0.5"></span>`;
+          btn.className = "cal-cell py-1.5 bg-primary text-white rounded-xl font-bold shadow-xs flex flex-col items-center justify-center ring-2 ring-primary/20";
+          btn.innerHTML = `<span class="leading-none text-sm font-bold">${day}</span><span class="w-1 h-1 bg-primary-fixed rounded-full mt-0.5"></span>`;
         } else {
-          btn.className = `cal-cell py-1.5 flex flex-col items-center justify-center ${hasShift ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`;
-          btn.innerHTML = `<span>${day}</span><span class="w-1 h-1 ${hasShift ? 'bg-[#1B68F8]' : 'bg-transparent'} rounded-full mt-0.5 dot"></span>`;
+          btn.className = `cal-cell py-1.5 flex flex-col items-center justify-center rounded-xl transition-colors hover:bg-surface-container-low ${hasShift ? 'font-bold text-on-surface' : 'font-medium text-secondary'}`;
+          btn.innerHTML = `<span>${day}</span><span class="w-1 h-1 ${hasShift ? 'bg-primary' : 'bg-transparent'} rounded-full mt-0.5 dot"></span>`;
         }
 
         btn.onclick = () => selectDate(day, `${calDate.toLocaleDateString('en-US', { month: 'short' })} ${day}, ${year}`, hasShift, btn);
         grid.appendChild(btn);
       }
 
-      // Trailing days
       const totalCells = firstWeekday + daysInMonth;
       const remaining = (7 - (totalCells % 7)) % 7;
       for (let day = 1; day <= remaining; day++) {
         const cell = document.createElement('span');
-        cell.className = "text-slate-300 py-1.5";
+        cell.className = "text-outline-variant py-2";
         cell.textContent = day;
         grid.appendChild(cell);
       }
@@ -1089,14 +1307,10 @@
     }
 
     function updateCalendarSummary() {
-      const year = calDate.getFullYear();
-      const month = calDate.getMonth();
       const monthTitle = calDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      
       const periodEl = document.getElementById('calendar-summary-period');
       if (periodEl) periodEl.textContent = `${monthTitle} Overview`;
 
-      // Match shifts for this month
       const currentMonthShort = calDate.toLocaleDateString('en-US', { month: 'short' });
       const monthShifts = monthlyShiftsData.filter(s => s.date.startsWith(currentMonthShort));
 
@@ -1107,22 +1321,20 @@
 
       monthShifts.forEach(s => {
         totalHours += (s.hours || 0);
-        const typeStr = (s.type || '').toLowerCase();
-        if (typeStr.includes('day')) {
-          dayCount++;
-        } else if (typeStr.includes('eve') || typeStr.includes('afternoon')) {
-          eveCount++;
-        } else if (typeStr.includes('night')) {
-          nightCount++;
-        }
+        const typeStr = (s.unit || '').toLowerCase();
+        if (typeStr.includes('day')) dayCount++;
+        else if (typeStr.includes('eve')) eveCount++;
+        else if (typeStr.includes('night')) nightCount++;
+        else dayCount++;
       });
 
-      const hoursEl = document.getElementById('calendar-summary-hours');
+      const pillEl = document.getElementById('calendar-summary-hours-pill');
+      if (pillEl) pillEl.textContent = `${totalHours.toFixed(1)} Total Hours Logged • ${monthShifts.length} Shifts`;
+
       const dayEl = document.getElementById('calendar-summary-day');
       const eveEl = document.getElementById('calendar-summary-evening');
       const nightEl = document.getElementById('calendar-summary-night');
 
-      if (hoursEl) hoursEl.textContent = totalHours.toFixed(1);
       if (dayEl) dayEl.textContent = dayCount;
       if (eveEl) eveEl.textContent = eveCount;
       if (nightEl) nightEl.textContent = nightCount;
@@ -1130,17 +1342,17 @@
 
     function selectDate(day, label, hasShift, element) {
       document.querySelectorAll('#calendar-grid-cells .cal-cell').forEach(btn => {
-        btn.classList.remove('bg-[#1B68F8]', 'text-white', 'rounded-xl', 'font-black', 'shadow-md');
-        btn.classList.add('text-slate-700');
+        btn.classList.remove('bg-primary', 'text-white', 'shadow-xs', 'ring-2', 'ring-primary/20');
+        btn.classList.add('text-on-surface');
         const dot = btn.querySelector('.dot');
-        if (dot) dot.classList.replace('bg-white', 'bg-[#1B68F8]');
+        if (dot && dot.classList.contains('bg-white')) dot.classList.replace('bg-white', 'bg-primary');
       });
 
-      element.classList.remove('text-slate-700');
-      element.classList.add('bg-[#1B68F8]', 'text-white', 'rounded-xl', 'font-black', 'shadow-md');
+      element.classList.remove('text-on-surface');
+      element.classList.add('bg-primary', 'text-white', 'shadow-xs');
       
       const dot = element.querySelector('.dot');
-      if (dot) dot.classList.replace('bg-[#1B68F8]', 'bg-white');
+      if (dot && dot.classList.contains('bg-primary')) dot.classList.replace('bg-primary', 'bg-white');
 
       document.getElementById('detail-date').textContent = label;
       document.getElementById('detail-count').textContent = hasShift ? '1 Shift Logged' : 'No Shifts Logged';
@@ -1148,169 +1360,140 @@
     }
 
     function shareShift() {
-      if (navigator.share) {
-        navigator.share({
-          title: 'NurseLog Shift Details',
-          text: 'Shift Details: General Hospital - Ward 4 (07:00 AM - 07:00 PM)',
-        }).catch(() => {});
-      } else {
-        showToast('Shift details copied to clipboard!');
-      }
+      showToast('Shift details copied to clipboard!');
     }
 
-    // ================= DYNAMIC REPORT DATA LINKING (Item 6) =================
-    function setReportType(type) {
-      currentReportScope = type;
-      const weekly = document.getElementById('report-weekly-card');
-      const monthly = document.getElementById('report-monthly-card');
-      if (type === 'weekly') {
-        weekly.className = "p-4 bg-white border-2 border-[#1B68F8] rounded-[22px] card-shadow cursor-pointer flex flex-col items-center text-center";
-        monthly.className = "p-4 bg-[#F8FAFC] border border-[#F1F4F8] rounded-[22px] cursor-pointer flex flex-col items-center text-center";
+    function setReportType(scope) {
+      currentReportScope = scope;
+      const weeklyBtn = document.getElementById('report-weekly-card');
+      const monthlyBtn = document.getElementById('report-monthly-card');
+      const weeklyRadio = document.getElementById('weekly-radio-icon');
+      const monthlyRadio = document.getElementById('monthly-radio-icon');
+
+      if (scope === 'weekly') {
+        weeklyBtn.className = 'flex flex-col text-left p-3.5 rounded-2xl bg-primary text-white transition-all duration-200 active:scale-[0.98] shadow-sm relative overflow-hidden ring-2 ring-primary/20';
+        weeklyRadio.className = 'material-symbols-outlined text-[18px] text-primary-fixed fill';
+        weeklyRadio.textContent = 'check_circle';
+
+        monthlyBtn.className = 'flex flex-col text-left p-3.5 rounded-2xl bg-white border border-outline-variant/50 text-on-surface transition-all duration-200 active:scale-[0.98] shadow-xs relative overflow-hidden group';
+        monthlyRadio.className = 'material-symbols-outlined text-[18px] text-outline';
+        monthlyRadio.textContent = 'radio_button_unchecked';
       } else {
-        monthly.className = "p-4 bg-white border-2 border-[#1B68F8] rounded-[22px] card-shadow cursor-pointer flex flex-col items-center text-center";
-        weekly.className = "p-4 bg-[#F8FAFC] border border-[#F1F4F8] rounded-[22px] cursor-pointer flex flex-col items-center text-center";
+        monthlyBtn.className = 'flex flex-col text-left p-3.5 rounded-2xl bg-primary text-white transition-all duration-200 active:scale-[0.98] shadow-sm relative overflow-hidden ring-2 ring-primary/20';
+        monthlyRadio.className = 'material-symbols-outlined text-[18px] text-primary-fixed fill';
+        monthlyRadio.textContent = 'check_circle';
+
+        weeklyBtn.className = 'flex flex-col text-left p-3.5 rounded-2xl bg-white border border-outline-variant/50 text-on-surface transition-all duration-200 active:scale-[0.98] shadow-xs relative overflow-hidden group';
+        weeklyRadio.className = 'material-symbols-outlined text-[18px] text-outline';
+        weeklyRadio.textContent = 'radio_button_unchecked';
       }
+
       updateReportView();
-      showToast(`Switched to ${type === 'weekly' ? 'Weekly' : 'Monthly'} Report`);
+      showToast(`Switched to ${scope === 'weekly' ? 'Weekly' : 'Monthly'} Scope`);
     }
 
     function updateReportView() {
-      const container = document.getElementById('preview-rows-container');
-      const countBadge = document.getElementById('preview-shift-count-badge');
-      const totalHoursEl = document.getElementById('preview-total-hours');
-
+      const tbody = document.getElementById('preview-table-body');
       const data = currentReportScope === 'weekly' ? weeklyShiftsData : monthlyShiftsData;
-      countBadge.textContent = `${data.length} shifts (${currentReportScope === 'weekly' ? 'Weekly' : 'Monthly'})`;
+      const totalHours = data.reduce((sum, item) => sum + item.hours, 0);
 
-      const staffEl = document.getElementById('preview-staff-name');
-      if (staffEl) staffEl.textContent = nurseName || 'Nurse Sarah';
-      const periodLabel = document.getElementById('preview-period-label');
-      if (periodLabel) periodLabel.textContent = currentReportScope === 'weekly' ? 'OCT 23 - OCT 29' : 'OCTOBER 2023';
+      document.getElementById('preview-cycle-pill').textContent = currentReportScope === 'weekly' ? 'Oct 23–29' : 'October';
+      document.getElementById('preview-cycle-label').textContent = currentReportScope === 'weekly' ? 'Oct 23–29' : 'Oct 2023';
+      document.getElementById('preview-approved-label').textContent = `${data.length} / ${data.length}`;
+      document.getElementById('preview-total-hours').textContent = `${totalHours.toFixed(1)} hrs`;
 
-      const total = data.reduce((sum, item) => sum + item.hours, 0);
-      totalHoursEl.textContent = total.toFixed(1);
-
-      container.innerHTML = '';
+      tbody.innerHTML = '';
       data.forEach(item => {
-        const row = document.createElement('div');
-        row.className = "flex items-center text-xs font-semibold text-[#111827] px-1 pt-2.5";
-        row.innerHTML = `
-          <div class="w-20 font-bold">${item.date}</div>
-          <div class="flex-1 text-[#64748B] truncate">${item.facility}</div>
-          <div class="font-extrabold">${item.hours.toFixed(1)}</div>
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-primary/5 transition-colors";
+        tr.innerHTML = `
+          <td class="py-2 px-2 font-semibold text-on-surface whitespace-nowrap">${item.date}</td>
+          <td class="py-2 px-1 text-on-surface">
+            <div class="flex flex-col">
+              <span class="font-medium text-on-surface leading-tight">${item.facility}</span>
+              <span class="text-[10px] text-on-surface-variant">${item.unit}</span>
+            </div>
+          </td>
+          <td class="py-2 px-1 font-bold text-primary text-right whitespace-nowrap">${item.hours.toFixed(1)}h</td>
+          <td class="py-2 px-2 text-right whitespace-nowrap">
+            <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+              <span class="material-symbols-outlined text-[12px]">check_circle</span> Signed
+            </span>
+          </td>
         `;
-        container.appendChild(row);
+        tbody.appendChild(tr);
       });
     }
 
     function setFormat(fmt) {
       currentFormat = fmt;
-      const pdf = document.getElementById('fmt-pdf');
-      const csv = document.getElementById('fmt-csv');
+      const pdfBtn = document.getElementById('fmt-pdf');
+      const csvBtn = document.getElementById('fmt-csv');
+      const badgePdf = document.getElementById('badge-pdf');
+      const badgeCsv = document.getElementById('badge-csv');
+      const downloadLabel = document.getElementById('btn-download-label');
+
       if (fmt === 'pdf') {
-        pdf.className = "h-14 bg-white border-2 border-[#1B68F8] rounded-2xl flex items-center justify-center gap-2 card-shadow";
-        csv.className = "h-14 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center justify-center gap-2";
+        pdfBtn.className = 'flex flex-col p-3 rounded-2xl bg-white border-2 border-primary text-on-surface transition-all active:scale-[0.97] shadow-xs text-left ring-2 ring-primary/10';
+        badgePdf.className = 'w-4 h-4 rounded-full bg-primary flex items-center justify-center text-white';
+        
+        csvBtn.className = 'flex flex-col p-3 rounded-2xl bg-white border border-outline-variant/50 text-on-surface transition-all active:scale-[0.97] text-left';
+        badgeCsv.className = 'w-4 h-4 rounded-full bg-outline-variant/60 flex items-center justify-center text-transparent';
+
+        downloadLabel.textContent = 'Download PDF Report';
       } else {
-        csv.className = "h-14 bg-white border-2 border-[#1B68F8] rounded-2xl flex items-center justify-center gap-2 card-shadow";
-        pdf.className = "h-14 bg-[#F8FAFC] border border-[#F1F4F8] rounded-2xl flex items-center justify-center gap-2";
+        csvBtn.className = 'flex flex-col p-3 rounded-2xl bg-white border-2 border-primary text-on-surface transition-all active:scale-[0.97] shadow-xs text-left ring-2 ring-primary/10';
+        badgeCsv.className = 'w-4 h-4 rounded-full bg-primary flex items-center justify-center text-white';
+
+        pdfBtn.className = 'flex flex-col p-3 rounded-2xl bg-white border border-outline-variant/50 text-on-surface transition-all active:scale-[0.97] text-left';
+        badgePdf.className = 'w-4 h-4 rounded-full bg-outline-variant/60 flex items-center justify-center text-transparent';
+
+        downloadLabel.textContent = 'Export CSV Raw Data';
       }
       showToast(`Format set to ${fmt.toUpperCase()}`);
     }
 
-    // Dynamic Download Engine (Exports Weekly or Monthly depending on active toggle - Item 6)
-    function downloadReport() {
+    function triggerDownload() {
+      const btn = document.getElementById('btn-download');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Generating ${currentFormat.toUpperCase()}...`;
+      btn.disabled = true;
+
       const activeData = currentReportScope === 'weekly' ? weeklyShiftsData : monthlyShiftsData;
-      const scopeLabel = currentReportScope === 'weekly' ? 'Weekly (OCT 23 - OCT 29, 2023)' : 'Monthly (OCTOBER 2023)';
       const totalHours = activeData.reduce((sum, item) => sum + item.hours, 0).toFixed(1);
-      const staffName = nurseName || 'Nurse Sarah';
 
-      if (currentFormat === 'csv') {
-        let csvContent = 
-`NurseLog Timesheet Report
-Staff Member: ${staffName}
-Report Scope: ${scopeLabel}
-Generated Date: ${new Date().toISOString().slice(0,10)}
-
-Date,Facility,Shift Type,Hours Worked\n`;
-
-        activeData.forEach(s => {
-          csvContent += `${s.date}," ${s.facility}","${s.type}",${s.hours.toFixed(1)}\n`;
-        });
-
-        csvContent += `\n,,,Total Hours,${totalHours}\n`;
-        csvContent += `Nurse Signature: ${staffName}\n`;
-        csvContent += `Official Timesheet Certified by NurseLog\n`;
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `NurseLog_${currentReportScope}_Timesheet_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showToast(`${currentReportScope.toUpperCase()} CSV report downloaded! 📄`);
-
-      } else {
-        // PDF format
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-          let rowsHtml = '';
+      setTimeout(() => {
+        if (currentFormat === 'csv') {
+          let csvContent = `PulseCare Agency Timesheet\nStaff: ${nurseName}\nScope: ${currentReportScope.toUpperCase()}\n\nDate,Facility,Unit,Hours\n`;
           activeData.forEach(s => {
-            rowsHtml += `<tr><td>${s.date}</td><td>${s.facility}</td><td>${s.type}</td><td><strong>${s.hours.toFixed(1)}</strong></td></tr>`;
+            csvContent += `${s.date},"${s.facility}","${s.unit}",${s.hours.toFixed(1)}\n`;
           });
+          csvContent += `\nTotal Hours,,${totalHours}\nStatus,,Signed & Verified\n`;
 
-          printWindow.document.write(`
-            <html>
-              <head>
-                <title>NurseLog Timesheet - ${scopeLabel} - ${staffName}</title>
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; }
-                  .header { border-bottom: 3px solid #1B68F8; padding-bottom: 16px; margin-bottom: 24px; }
-                  .title { font-size: 24px; font-weight: 800; color: #1B68F8; }
-                  .meta { margin-top: 8px; font-size: 14px; color: #64748b; }
-                  table { width: 100%; border-collapse: collapse; margin-top: 24px; }
-                  th { background: #f8fafc; text-align: left; padding: 12px; font-size: 13px; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-                  td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-                  .total { font-weight: bold; font-size: 16px; color: #1B68F8; }
-                  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: space-between; font-size: 13px; color: #64748b; }
-                </style>
-              </head>
-              <body>
-                <div class="header">
-                  <div class="title">NurseLog Timesheet Report</div>
-                  <div class="meta"><strong>Staff Member:</strong> ${staffName} &bull; <strong>Scope:</strong> ${scopeLabel}</div>
-                </div>
-                <table>
-                  <thead>
-                    <tr><th>Date</th><th>Facility</th><th>Shift Type</th><th>Hours</th></tr>
-                  </thead>
-                  <tbody>
-                    ${rowsHtml}
-                    <tr><td colspan="3" class="total">Total Hours Worked</td><td class="total">${totalHours}</td></tr>
-                  </tbody>
-                </table>
-                <div class="footer">
-                  <div>Employee: ${staffName} (Certified)</div>
-                  <div>NurseLog Digital Verification System</div>
-                </div>
-                <' + 'script>
-                  window.onload = function() { window.print(); };
-                <' + '/script>
-              </body>
-            </html>
-          `);
-          printWindow.document.close();
-          showToast(`PDF ${currentReportScope} report opened! 📄`);
-        } else {
-          showToast(`PDF generated for ${currentReportScope} report! 📄`);
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.setAttribute("href", url);
+          link.setAttribute("download", `PulseCare_${currentReportScope}_Timesheet.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
         }
-      }
+
+        btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">check</span> Exported ${currentFormat.toUpperCase()}!`;
+        showToast(`${currentReportScope.toUpperCase()} ${currentFormat.toUpperCase()} exported! 📄`);
+
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }, 2000);
+      }, 1000);
     }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
-      toast.textContent = msg;
+      const toastText = document.getElementById('toast-text');
+      toastText.textContent = msg;
       toast.classList.remove('opacity-0', '-translate-y-6');
       toast.classList.add('opacity-100', 'translate-y-0');
       setTimeout(() => {

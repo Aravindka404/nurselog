@@ -18,7 +18,6 @@ class SettingsModal extends StatefulWidget {
 class _SettingsModalState extends State<SettingsModal> {
   final TextEditingController _newLocationController = TextEditingController();
   late final TextEditingController _nameController;
-  ShiftType _selectedTimingType = ShiftType.day;
 
   @override
   void initState() {
@@ -35,348 +34,342 @@ class _SettingsModalState extends State<SettingsModal> {
 
   @override
   Widget build(BuildContext context) {
-    final timings = widget.controller.defaultTimings[_selectedTimingType]!;
-    const surfaceColor = Colors.white;
-    const textPrimaryColor = AppColors.textPrimary;
-    const textSecondaryColor = AppColors.textSecondary;
-    const inputBgColor = AppColors.inputBackground;
-    const cardBorderColor = Color(0xFFF1F4F8);
-
     return Container(
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      height: MediaQuery.of(context).size.height * 0.9,
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: EdgeInsets.only(
-        top: 24,
-        left: 20,
-        right: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Modal Handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      child: Column(
+        children: [
+          // Drag Handle
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFC1C9BF),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 18),
+          ),
+          const SizedBox(height: 10),
 
-            // Modal Header
-            Row(
+          // Modal Top Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(
-                      'Nurse Preferences',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: textPrimaryColor,
-                        letterSpacing: -0.4,
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
+                          size: 20,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Customize profile, theme & shift defaults',
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Profile & Settings',
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: textSecondaryColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
                       ),
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F4F8),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: textSecondaryColor,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // ================= SECTION 0: NURSE PROFILE & APPEARANCE =================
-            Text(
-              'NURSE PROFILE',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: textSecondaryColor,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // Edit Name Field
-            Container(
-              decoration: BoxDecoration(
-                color: inputBgColor,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cardBorderColor),
-              ),
-              child: TextField(
-                controller: _nameController,
-                onChanged: widget.controller.setUserName,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: textPrimaryColor,
-                ),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(
-                    Icons.person_outline_rounded,
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
                     color: AppColors.primary,
-                    size: 20,
+                    shape: BoxShape.circle,
                   ),
-                  hintText: 'Enter your name (e.g. Nurse Sarah)',
-                  hintStyle: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: textSecondaryColor,
+                  child: const Icon(
+                    Icons.person_rounded,
+                    color: Colors.white,
+                    size: 18,
                   ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Scrollable Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Hero Profile Card
+                  _buildHeroCard(),
+
+                  const SizedBox(height: 16),
+
+                  // Section 1: Personal Information
+                  _buildPersonalInfoCard(),
+
+                  const SizedBox(height: 16),
+
+                  // Section 2: Preferred Facilities & Units
+                  _buildFacilitiesCard(),
+
+                  const SizedBox(height: 16),
+
+                  // Section 3: Default Shift Timings
+                  _buildDefaultTimingsCard(),
+
+                  const SizedBox(height: 20),
+
+                  // Save All Preferences CTA Button
+                  _buildSaveAllButton(),
+
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5EF),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primaryLight.withOpacity(0.4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.18),
+                      blurRadius: 16,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: 50,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.photo_camera_rounded,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                widget.controller.userName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 5),
+              const Icon(
+                Icons.verified_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Title
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.badge_rounded,
+                  color: Color(0xFF00210E),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Personal Information',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    'Credentials & timesheet identification',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Nurse Name Label & Input
+          const Text(
+            'NURSE NAME',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textSecondary,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5EF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              controller: _nameController,
+              onChanged: widget.controller.setUserName,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: InputBorder.none,
+                suffixIcon: Icon(
+                  Icons.edit_rounded,
+                  size: 18,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: 8),
 
-            const SizedBox(height: 24),
-
-            // ================= SECTION 1: DEFAULT SHIFT TIMINGS (Item 3) =================
-            const Text(
-              'DEFAULT SHIFT TIMINGS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.8,
-              ),
+          // Tip Box
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECE1D3).withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(height: 12),
-
-            // Day / Evening / Night Tab Selector
-            Container(
-              height: 44,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEFF2F6),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                children: [
-                  _buildTimingTab('Day', ShiftType.day),
-                  _buildTimingTab('Evening', ShiftType.evening),
-                  _buildTimingTab('Night', ShiftType.night),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // Timing Configure Box
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFF1F4F8)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildTimeInputBox(
-                      label: 'Start Time',
-                      time: timings.startTime,
-                      period: timings.startPeriod,
-                      onTap: () => _pickTime(isStart: true),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTimeInputBox(
-                      label: 'End Time',
-                      time: timings.endTime,
-                      period: timings.endPeriod,
-                      onTap: () => _pickTime(isStart: false),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 26),
-
-            // ================= SECTION 2: MANAGE LOCATIONS (Item 4) =================
-            const Text(
-              'SAVED LOCATIONS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Add Location Input Field
-            Row(
-              children: [
+            child: Row(
+              children: const [
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 15,
+                  color: Color(0xFF6D5622),
+                ),
+                SizedBox(width: 6),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.inputBackground,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: TextField(
-                      controller: _newLocationController,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: 'Add facility (e.g. ICU, Clinic A)',
-                        hintStyle: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textMuted,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    final text = _newLocationController.text.trim();
-                    if (text.isNotEmpty) {
-                      widget.controller.addSavedLocation(text);
-                      _newLocationController.clear();
-                      setState(() {});
-                    }
-                  },
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      color: Colors.white,
-                      size: 24,
+                  child: Text(
+                    'Updates dashboard greeting & timesheet export headers automatically.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF201B12),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 12),
 
-            // List of Saved Locations as Chips
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.controller.savedLocations.map((loc) {
-                final isCurrent = widget.controller.location == loc;
-                return GestureDetector(
-                  onTap: () {
-                    widget.controller.setLocation(loc);
-                    setState(() {});
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isCurrent ? AppColors.primaryLight : const Color(0xFFF1F4F8),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isCurrent ? AppColors.primary : Colors.transparent,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.location_on_rounded,
-                          size: 14,
-                          color: isCurrent ? AppColors.primary : AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          loc,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                            color: isCurrent ? AppColors.primary : AppColors.textPrimary,
-                          ),
-                        ),
-                        if (widget.controller.savedLocations.length > 1) ...[
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () {
-                              widget.controller.removeSavedLocation(loc);
-                              setState(() {});
-                            },
-                            child: const Icon(
-                              Icons.close_rounded,
-                              size: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-
-            const SizedBox(height: 28),
-
-            // Save & Close Button
-            Container(
-              width: double.infinity,
-              height: 52,
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: AppColors.buttonGlow,
+          // Bottom status & Update button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Last verified: 3 days ago',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textSecondary,
+                ),
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    Navigator.of(context).pop();
+              GestureDetector(
+                onTap: () {
+                  final text = _nameController.text.trim();
+                  if (text.isNotEmpty) {
+                    widget.controller.setUserName(text);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text("Preferences saved successfully!"),
+                        content: Text('Profile updated for $text'),
                         backgroundColor: AppColors.primary,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -384,119 +377,456 @@ class _SettingsModalState extends State<SettingsModal> {
                         ),
                       ),
                     );
-                  },
-                  child: const Center(
-                    child: Text(
-                      'Save & Close',
-                      style: TextStyle(
+                    setState(() {});
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(
+                        Icons.save_rounded,
+                        size: 15,
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        'Update Profile',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFacilitiesCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE9DED0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.local_hospital_rounded,
+                  color: Color(0xFF696156),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Preferred Facilities & Units',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    'Populates the facility selector on the Daily Shift Log.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Facility Items List
+          ...widget.controller.savedLocations.asMap().entries.map((entry) {
+            final index = entry.key;
+            final loc = entry.value;
+            final isDefault = index == 0;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5EF),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            loc,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        if (isDefault) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight,
+                              borderRadius: BorderRadius.circular(9999),
+                            ),
+                            child: const Text(
+                              'DEFAULT',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF00210E),
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (widget.controller.savedLocations.length > 1)
+                    GestureDetector(
+                      onTap: () {
+                        widget.controller.removeSavedLocation(loc);
+                        setState(() {});
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: Color(0xFFBA1A1A),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+            );
+          }),
 
-  Widget _buildTimingTab(String title, ShiftType type) {
-    final isSelected = _selectedTimingType == type;
+          const SizedBox(height: 8),
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedTimingType = type),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+          // Add Facility Input Row
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5EF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _newLocationController,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
-                  ]
-                : null,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-              color: isSelected ? AppColors.primary : AppColors.textPrimary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeInputBox({
-    required String label,
-    required String time,
-    required String period,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: const Color(0xFFE2E8F0),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                    decoration: const InputDecoration(
+                      hintText: 'e.g. Valley Health — Step Down Unit',
+                      hintStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textMuted,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  time,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  period,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  final text = _newLocationController.text.trim();
+                  if (text.isNotEmpty) {
+                    widget.controller.addSavedLocation(text);
+                    _newLocationController.clear();
+                    setState(() {});
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
                     color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(
+                        Icons.add_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Add',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> _pickTime({required bool isStart}) async {
-    final timings = widget.controller.defaultTimings[_selectedTimingType]!;
+  Widget _buildDefaultTimingsCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFDEA0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.schedule_rounded,
+                  color: Color(0xFF6D5622),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Default Shift Timings',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    'Auto-populates start and end times on shift quick-log.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // 3 Shift Timing Cards: Day, Evening, Night
+          _buildTimingRow(
+            type: ShiftType.day,
+            title: 'Day Shift',
+            icon: Icons.light_mode_rounded,
+            iconColor: const Color(0xFF6D5622),
+          ),
+          const SizedBox(height: 10),
+          _buildTimingRow(
+            type: ShiftType.evening,
+            title: 'Evening Shift',
+            icon: Icons.wb_twilight_rounded,
+            iconColor: AppColors.secondary,
+          ),
+          const SizedBox(height: 10),
+          _buildTimingRow(
+            type: ShiftType.night,
+            title: 'Night Shift',
+            icon: Icons.bedtime_rounded,
+            iconColor: AppColors.primary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimingRow({
+    required ShiftType type,
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    final timing = widget.controller.defaultTimings[type]!;
+    final hoursStr = timing.defaultHours % 1 == 0
+        ? '${timing.defaultHours.toInt()} hrs'
+        : '${timing.defaultHours} hrs';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5EF),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 18, color: iconColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(9999),
+                ),
+                child: Text(
+                  hoursStr,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _pickTime(type: type, isStart: true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'START TIME',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${timing.startTime} ${timing.startPeriod}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _pickTime(type: type, isStart: false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'END TIME',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${timing.endTime} ${timing.endPeriod}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickTime({required ShiftType type, required bool isStart}) async {
+    final timings = widget.controller.defaultTimings[type]!;
     final timeStr = isStart ? timings.startTime : timings.endTime;
     final period = isStart ? timings.startPeriod : timings.endPeriod;
     final hourPart = int.tryParse(timeStr.split(':')[0]) ?? 7;
@@ -522,7 +852,7 @@ class _SettingsModalState extends State<SettingsModal> {
 
       if (isStart) {
         widget.controller.updateDefaultTiming(
-          type: _selectedTimingType,
+          type: type,
           startTime: '$formattedHour:$formattedMinute',
           startPeriod: newPeriod,
           endTime: timings.endTime,
@@ -531,7 +861,7 @@ class _SettingsModalState extends State<SettingsModal> {
         );
       } else {
         widget.controller.updateDefaultTiming(
-          type: _selectedTimingType,
+          type: type,
           startTime: timings.startTime,
           startPeriod: timings.startPeriod,
           endTime: '$formattedHour:$formattedMinute',
@@ -541,5 +871,66 @@ class _SettingsModalState extends State<SettingsModal> {
       }
       setState(() {});
     }
+  }
+
+  Widget _buildSaveAllButton() {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            final nameText = _nameController.text.trim();
+            if (nameText.isNotEmpty) {
+              widget.controller.setUserName(nameText);
+            }
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Preferences saved successfully!'),
+                backgroundColor: AppColors.primary,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(
+                Icons.check_circle_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Save All Preferences',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
