@@ -64,7 +64,7 @@ class ReportsScreen extends StatelessWidget {
                 weeklyHours: 36.0,
                 weeklyShiftsCount: 3,
                 monthlyPeriod: 'October 2023',
-                monthlyHours: controller.monthlyTotalHours > 0 ? controller.monthlyTotalHours : 168.0,
+                monthlyHours: controller.currentMonthTotalHours > 0 ? controller.currentMonthTotalHours : 168.0,
                 monthlySubtitle: 'Fully Verified',
               ),
 

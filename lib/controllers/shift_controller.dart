@@ -376,6 +376,8 @@ class ShiftController extends ChangeNotifier {
     return currentMonthShifts.fold(0.0, (sum, s) => sum + s.hoursWorked);
   }
 
+  double get monthlyTotalHours => currentMonthTotalHours;
+
   int get currentMonthDayShiftsCount {
     return currentMonthShifts.where((s) => s.shiftType == ShiftType.day).length;
   }
