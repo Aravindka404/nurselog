@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../controllers/shift_controller.dart';
+import '../services/report_export_service.dart';
 import '../widgets/report_type_selector.dart';
 import '../widgets/format_selector.dart';
 import '../widgets/timesheet_preview.dart';
+import '../widgets/user_avatar.dart';
 
-class ReportsScreen extends StatelessWidget {
+class ReportsScreen extends StatefulWidget {
   final ShiftController controller;
   final VoidCallback onBack;
 
@@ -16,8 +18,62 @@ class ReportsScreen extends StatelessWidget {
   });
 
   @override
+  State<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<ReportsScreen> {
+  bool _isExporting = false;
+
+  Future<void> _handleExport(BuildContext context) async {
+    if (_isExporting) return;
+    setState(() => _isExporting = true);
+
+    try {
+      bool success = false;
+      if (widget.controller.reportFormat == ReportFormat.pdf) {
+        success = await ReportExportService.generateAndSharePdf(
+          context: context,
+          controller: widget.controller,
+        );
+      } else {
+        success = await ReportExportService.generateAndShareCsv(
+          context: context,
+          controller: widget.controller,
+        );
+      }
+
+      if (mounted) {
+        final formatName = widget.controller.reportFormat == ReportFormat.pdf ? 'PDF' : 'CSV';
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Prepared $formatName report! Share dialog opened.'),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Could not generate $formatName report. Please try again.'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final formatLabel = controller.reportFormat == ReportFormat.pdf
+    final formatLabel = widget.controller.reportFormat == ReportFormat.pdf
         ? 'Download PDF Report'
         : 'Export CSV Raw Data';
 
@@ -29,7 +85,7 @@ class ReportsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Bar matching Stitch Screen 3
+              // Top Bar matching Stitch Screen 3 (No Bell)
               _buildTopBar(context),
 
               const SizedBox(height: 16),
@@ -58,13 +114,15 @@ class ReportsScreen extends StatelessWidget {
 
               // Weekly / Monthly Toggle Cards
               ReportTypeSelector(
-                selectedType: controller.reportType,
-                onTypeChanged: controller.setReportType,
-                weeklyPeriod: 'Oct 23 – 29',
-                weeklyHours: 36.0,
-                weeklyShiftsCount: 3,
+                selectedType: widget.controller.reportType,
+                onTypeChanged: widget.controller.setReportType,
+                weeklyPeriod: widget.controller.activeReportSubtitle,
+                weeklyHours: widget.controller.activeReportTotalHours,
+                weeklyShiftsCount: widget.controller.activeReportShifts.length,
                 monthlyPeriod: 'October 2023',
-                monthlyHours: controller.currentMonthTotalHours > 0 ? controller.currentMonthTotalHours : 168.0,
+                monthlyHours: widget.controller.currentMonthTotalHours > 0
+                    ? widget.controller.currentMonthTotalHours
+                    : 168.0,
                 monthlySubtitle: 'Fully Verified',
               ),
 
@@ -72,18 +130,18 @@ class ReportsScreen extends StatelessWidget {
 
               // SELECT FORMAT: PDF / CSV
               FormatSelector(
-                selectedFormat: controller.reportFormat,
-                onFormatChanged: controller.setReportFormat,
+                selectedFormat: widget.controller.reportFormat,
+                onFormatChanged: widget.controller.setReportFormat,
               ),
 
               const SizedBox(height: 18),
 
               // PREVIEW: Table + Total Hours
-              TimesheetPreview(controller: controller),
+              TimesheetPreview(controller: widget.controller),
 
               const SizedBox(height: 24),
 
-              // Primary Action: Download / Export Button
+              // Primary Action: Download / Export Button with native share integration
               _buildDownloadButton(context, formatLabel),
 
               const SizedBox(height: 24),
@@ -101,7 +159,7 @@ class ReportsScreen extends StatelessWidget {
         Row(
           children: [
             GestureDetector(
-              onTap: onBack,
+              onTap: widget.onBack,
               child: Container(
                 width: 38,
                 height: 38,
@@ -156,37 +214,11 @@ class ReportsScreen extends StatelessWidget {
             ),
           ],
         ),
-        Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: const Icon(
-                Icons.notifications_none_rounded,
-                size: 20,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight.withOpacity(0.4),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person_rounded,
-                size: 18,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
+
+        // Profile Avatar (No Bell)
+        UserAvatar(
+          imagePath: widget.controller.profileImagePath,
+          size: 34,
         ),
       ],
     );
@@ -211,38 +243,45 @@ class ReportsScreen extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Downloaded ${controller.reportFormat == ReportFormat.pdf ? 'PDF' : 'CSV'} report successfully!',
-                ),
-                backgroundColor: AppColors.primary,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            );
-          },
+          onTap: _isExporting ? null : () => _handleExport(context),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.download_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
+              if (_isExporting) ...[
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Generating Document...',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ] else ...[
+                const Icon(
+                  Icons.download_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

@@ -19,6 +19,8 @@ class QuickLogCard extends StatefulWidget {
 class _QuickLogCardState extends State<QuickLogCard> {
   late final TextEditingController _locationController;
   bool _isLogging = false;
+  bool _isOffDutySelected = false;
+  OffDutyType? _selectedOffType;
 
   @override
   void initState() {
@@ -148,6 +150,20 @@ class _QuickLogCardState extends State<QuickLogCard> {
           ),
           const SizedBox(height: 6),
           _buildShiftTypeToggle(),
+
+          const SizedBox(height: 14),
+
+          // Shift Pattern / Off Status Consolidated Toggle (Stitch Screen 1)
+          const Text(
+            'Shift Pattern / Off Status',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _buildOffStatusToggle(),
 
           const SizedBox(height: 16),
 
@@ -320,11 +336,19 @@ class _QuickLogCardState extends State<QuickLogCard> {
     required ShiftType type,
     required IconData icon,
   }) {
-    final isSelected = widget.controller.shiftType == type;
+    final isSelected = !widget.controller.selectedOffDutyType.displayName.isEmpty &&
+        !_isOffDutySelected &&
+        widget.controller.shiftType == type;
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => widget.controller.setShiftType(type),
+        onTap: () {
+          setState(() {
+            _isOffDutySelected = false;
+            _selectedOffType = null;
+          });
+          widget.controller.setShiftType(type);
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
@@ -363,6 +387,128 @@ class _QuickLogCardState extends State<QuickLogCard> {
           ),
         ),
       ),
+    );
+  }
+
+  // Consolidated Shift Pattern / Off Status Toggle (Stitch Screen 1)
+  Widget _buildOffStatusToggle() {
+    final isOffDutyActive = _isOffDutySelected && _selectedOffType == OffDutyType.offDuty;
+    final isNightOffActive = _isOffDutySelected && _selectedOffType == OffDutyType.nightOff;
+
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _isOffDutySelected = true;
+                _selectedOffType = OffDutyType.offDuty;
+                widget.controller.selectOffDutyType(OffDutyType.offDuty);
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+              decoration: BoxDecoration(
+                color: isOffDutyActive
+                    ? AppColors.secondaryContainer
+                    : AppColors.surfaceLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isOffDutyActive
+                      ? AppColors.secondary.withOpacity(0.5)
+                      : AppColors.cardBorder,
+                  width: isOffDutyActive ? 1.5 : 1,
+                ),
+                boxShadow: isOffDutyActive
+                    ? [
+                        BoxShadow(
+                          color: AppColors.secondary.withOpacity(0.12),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.coffee_rounded,
+                    size: 15,
+                    color: isOffDutyActive ? AppColors.secondary : AppColors.outline,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Off Duty',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isOffDutyActive ? FontWeight.w800 : FontWeight.w600,
+                      color: isOffDutyActive ? AppColors.textPrimary : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _isOffDutySelected = true;
+                _selectedOffType = OffDutyType.nightOff;
+                widget.controller.selectOffDutyType(OffDutyType.nightOff);
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+              decoration: BoxDecoration(
+                color: isNightOffActive
+                    ? AppColors.secondaryContainer
+                    : AppColors.surfaceLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isNightOffActive
+                      ? AppColors.secondary.withOpacity(0.5)
+                      : AppColors.cardBorder,
+                  width: isNightOffActive ? 1.5 : 1,
+                ),
+                boxShadow: isNightOffActive
+                    ? [
+                        BoxShadow(
+                          color: AppColors.secondary.withOpacity(0.12),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.nights_stay_rounded,
+                    size: 15,
+                    color: isNightOffActive ? AppColors.secondary : AppColors.outline,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Night Off',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isNightOffActive ? FontWeight.w800 : FontWeight.w600,
+                      color: isNightOffActive ? AppColors.textPrimary : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -461,16 +607,24 @@ class _QuickLogCardState extends State<QuickLogCard> {
 
   // Primary Log Button with tactile feedback & celebration toast
   Widget _buildLogButton(BuildContext context) {
+    final isOff = _isOffDutySelected && _selectedOffType != null;
+    final buttonLabel = isOff
+        ? 'Record ${_selectedOffType!.displayName}'
+        : (_isLogging ? 'Logging Shift...' : 'Log Shift');
+    final buttonIcon = isOff
+        ? (_selectedOffType == OffDutyType.offDuty ? Icons.coffee_rounded : Icons.nights_stay_rounded)
+        : (_isLogging ? Icons.hourglass_top_rounded : Icons.check_circle_rounded);
+
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
         onPressed: _isLogging ? null : () => _handleLogShift(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: isOff ? AppColors.secondary : AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 2,
-          shadowColor: AppColors.primary.withOpacity(0.3),
+          shadowColor: (isOff ? AppColors.secondary : AppColors.primary).withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -480,13 +634,13 @@ class _QuickLogCardState extends State<QuickLogCard> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _isLogging ? Icons.hourglass_top_rounded : Icons.check_circle_rounded,
+              buttonIcon,
               size: 19,
               color: Colors.white,
             ),
             const SizedBox(width: 8),
             Text(
-              _isLogging ? 'Logging Shift...' : 'Log Shift',
+              buttonLabel,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -501,6 +655,50 @@ class _QuickLogCardState extends State<QuickLogCard> {
   }
 
   void _handleLogShift(BuildContext context) {
+    if (_isOffDutySelected && _selectedOffType != null) {
+      widget.controller.logOffDuty(_selectedOffType!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.textPrimary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+          content: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: const BoxDecoration(
+                  color: AppColors.secondary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _selectedOffType == OffDutyType.offDuty
+                      ? Icons.coffee_rounded
+                      : Icons.nights_stay_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '${_selectedOffType!.displayName} recorded for today! Enjoy your rest.',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+
     if (widget.controller.hasShiftToday()) {
       _showDuplicateDialog(context);
     } else {

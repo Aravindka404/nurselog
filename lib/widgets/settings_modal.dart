@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../models/shift.dart';
 import '../controllers/shift_controller.dart';
+import 'user_avatar.dart';
 
 class SettingsModal extends StatefulWidget {
   final ShiftController controller;
@@ -30,6 +31,21 @@ class _SettingsModalState extends State<SettingsModal> {
     _newLocationController.dispose();
     _nameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handlePickImage() async {
+    final success = await widget.controller.pickAndSaveProfileImage();
+    if (success && mounted) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Profile photo updated successfully!'),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   @override
@@ -93,18 +109,9 @@ class _SettingsModalState extends State<SettingsModal> {
                     ),
                   ],
                 ),
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
+                UserAvatar(
+                  imagePath: widget.controller.profileImagePath,
+                  size: 34,
                 ),
               ],
             ),
@@ -162,48 +169,48 @@ class _SettingsModalState extends State<SettingsModal> {
       ),
       child: Column(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryLight.withOpacity(0.4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.18),
-                      blurRadius: 16,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 50,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
+          GestureDetector(
+            onTap: _handlePickImage,
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.18),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.photo_camera_rounded,
-                    size: 15,
-                    color: Colors.white,
+                  child: UserAvatar(
+                    imagePath: widget.controller.profileImagePath,
+                    size: 88,
+                    showBorder: true,
+                    borderColor: AppColors.primary,
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.photo_camera_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -224,6 +231,18 @@ class _SettingsModalState extends State<SettingsModal> {
                 size: 20,
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: _handlePickImage,
+            child: const Text(
+              'Tap photo to change avatar',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
           ),
         ],
       ),

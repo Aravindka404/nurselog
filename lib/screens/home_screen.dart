@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../controllers/shift_controller.dart';
 import '../widgets/quick_log_card.dart';
-import '../widgets/off_duty_card.dart';
 import '../widgets/recent_shifts_list.dart';
 import '../widgets/settings_modal.dart';
+import '../widgets/user_avatar.dart';
 
 class HomeScreen extends StatelessWidget {
   final ShiftController controller;
@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top App Bar matching Stitch Brand Header
+            // Top App Bar matching Stitch Brand Header (No Bell)
             _buildTopAppBar(context),
 
             // Scrollable Content
@@ -47,13 +47,8 @@ class HomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 18),
 
-                    // Primary Interactive Card: Quick Log Today's Shift
+                    // Primary Interactive Card: Quick Log Today's Shift (Unified with Shift Pattern / Off Status)
                     QuickLogCard(controller: controller),
-
-                    const SizedBox(height: 18),
-
-                    // Shift Pattern / Mark Time Off Section
-                    OffDutyCard(controller: controller),
 
                     const SizedBox(height: 20),
 
@@ -75,7 +70,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Top App Bar with Terra Organic Forest Logo Badge & Notifications/Profile
+  // Top App Bar with Terra Organic Forest Logo Badge & Profile Avatar (No Bell)
   Widget _buildTopAppBar(BuildContext context) {
     return Container(
       height: 60,
@@ -127,63 +122,11 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
 
-          // Notification Bell & Profile Avatar Action
-          Row(
-            children: [
-              // Notification Bell with unread dot
-              Stack(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: AppColors.textSecondary,
-                      size: 24,
-                    ),
-                    splashRadius: 20,
-                    tooltip: 'Notifications',
-                  ),
-                  Positioned(
-                    top: 10,
-                    right: 12,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 4),
-
-              // Profile Avatar Button (Opens Settings)
-              GestureDetector(
-                onTap: () => _openSettings(context),
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.25),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.person_rounded,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          // Profile Avatar Action Button (Opens Settings)
+          UserAvatar(
+            imagePath: controller.profileImagePath,
+            size: 34,
+            onTap: () => _openSettings(context),
           ),
         ],
       ),

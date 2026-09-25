@@ -34,6 +34,39 @@ enum OffDutyType {
   String get subtitle => this == OffDutyType.offDuty ? 'Full Day Off' : 'Scheduled Rest';
 }
 
+class ShiftTimingConfig {
+  String startTime;
+  String startPeriod;
+  String endTime;
+  String endPeriod;
+  double defaultHours;
+
+  ShiftTimingConfig({
+    required this.startTime,
+    required this.startPeriod,
+    required this.endTime,
+    required this.endPeriod,
+    required this.defaultHours,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'startTime': startTime,
+        'startPeriod': startPeriod,
+        'endTime': endTime,
+        'endPeriod': endPeriod,
+        'defaultHours': defaultHours,
+      };
+
+  factory ShiftTimingConfig.fromJson(Map<String, dynamic> json) =>
+      ShiftTimingConfig(
+        startTime: json['startTime'] as String? ?? '07:00',
+        startPeriod: json['startPeriod'] as String? ?? 'AM',
+        endTime: json['endTime'] as String? ?? '07:30',
+        endPeriod: json['endPeriod'] as String? ?? 'PM',
+        defaultHours: (json['defaultHours'] as num?)?.toDouble() ?? 12.5,
+      );
+}
+
 class Shift {
   final String id;
   final String title;

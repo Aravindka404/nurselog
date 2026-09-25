@@ -7,6 +7,7 @@ import '../widgets/calendar_grid.dart';
 import '../widgets/shift_detail_card.dart';
 import '../widgets/shift_data_summary_card.dart';
 import '../widgets/settings_modal.dart';
+import '../widgets/user_avatar.dart';
 
 class CalendarScreen extends StatelessWidget {
   final ShiftController controller;
@@ -209,41 +210,11 @@ class CalendarScreen extends StatelessWidget {
             ],
           ),
 
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.notifications_none_rounded,
-                  color: AppColors.textSecondary,
-                  size: 24,
-                ),
-                splashRadius: 20,
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                onTap: () => _openSettings(context),
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.25),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.person_rounded,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          // Profile Avatar (No Bell)
+          UserAvatar(
+            imagePath: controller.profileImagePath,
+            size: 34,
+            onTap: () => _openSettings(context),
           ),
         ],
       ),
@@ -336,6 +307,61 @@ class _AddEditShiftModalState extends State<_AddEditShiftModal> {
     _location = shift?.facility ?? widget.controller.location;
     _startTime = shift != null ? shift.startTime : '07:00 AM';
     _endTime = shift != null ? shift.endTime : '07:00 PM';
+  }
+
+  Future<void> _pickTime({required bool isStart}) async {
+    final currentStr = isStart ? _startTime : _endTime;
+    TimeOfDay initial = isStart
+        ? const TimeOfDay(hour: 7, minute: 0)
+        : const TimeOfDay(hour: 19, minute: 0);
+
+    try {
+      final parts = currentStr.trim().split(' ');
+      final timeParts = parts[0].split(':');
+      var hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+      final isPm = parts.length > 1 && parts[1].toUpperCase() == 'PM';
+      if (isPm && hour < 12) hour += 12;
+      if (!isPm && hour == 12) hour = 0;
+      initial = TimeOfDay(hour: hour, minute: minute);
+    } catch (_) {}
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+
+    if (picked != null) {
+      final hour = picked.hourOfPeriod == 0 ? 12 : picked.hourOfPeriod;
+      final formattedHour = hour.toString().padLeft(2, '0');
+      final formattedMinute = picked.minute.toString().padLeft(2, '0');
+      final period = picked.period == DayPeriod.am ? 'AM' : 'PM';
+      final formatted = '$formattedHour:$formattedMinute $period';
+
+      setState(() {
+        if (isStart) {
+          _startTime = formatted;
+        } else {
+          _endTime = formatted;
+        }
+      });
+    }
+  }
+
+  double _calculateDuration(String startStr, String endStr) {
+    try {
+      final format = DateFormat('hh:mm a');
+      final start = format.parse(startStr.trim());
+      final end = format.parse(endStr.trim());
+      var diffMinutes = end.difference(start).inMinutes;
+      if (diffMinutes < 0) {
+        diffMinutes += 24 * 60;
+      }
+      final hours = diffMinutes / 60.0;
+      return double.parse(hours.toStringAsFixed(1));
+    } catch (_) {
+      return _shiftType == ShiftType.evening ? 8.5 : 12.0;
+    }
   }
 
   @override
@@ -477,87 +503,140 @@ class _AddEditShiftModalState extends State<_AddEditShiftModal> {
 
             const SizedBox(height: 14),
 
-            // Start & End Time Text
+            // Start & End Time Pickers (Interactive)
             Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'START TIME',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceLow,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.cardBorder),
-                        ),
-                        child: Text(
-                          _startTime,
-                          style: const TextStyle(
-                            fontSize: 13,
+                  child: GestureDetector(
+                    onTap: () => _pickTime(isStart: true),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'START TIME',
+                          style: TextStyle(
+                            fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.6,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceLow,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.cardBorder),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _startTime,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.access_time_rounded,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'END TIME',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceLow,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.cardBorder),
-                        ),
-                        child: Text(
-                          _endTime,
-                          style: const TextStyle(
-                            fontSize: 13,
+                  child: GestureDetector(
+                    onTap: () => _pickTime(isStart: false),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'END TIME',
+                          style: TextStyle(
+                            fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.6,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceLow,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.cardBorder),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _endTime,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.access_time_rounded,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
+
+            // Calculated Duration Indicator Pill
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.timer_rounded, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Calculated Duration: ${_calculateDuration(_startTime, _endTime)} hrs',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
 
             // Save Button
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  final calculatedHours = _calculateDuration(_startTime, _endTime);
                   final newShift = Shift(
                     id: widget.existingShift?.id ?? 's-${DateTime.now().millisecondsSinceEpoch}',
                     title: _shiftType.label,
@@ -566,26 +645,22 @@ class _AddEditShiftModalState extends State<_AddEditShiftModal> {
                     date: widget.targetDate,
                     startTime: _startTime,
                     endTime: _endTime,
-                    hoursWorked: _shiftType == ShiftType.evening ? 8.5 : 12.0,
+                    hoursWorked: calculatedHours > 0 ? calculatedHours : 12.0,
                   );
 
-                  // Replace or add
-                  widget.controller.shifts.removeWhere((s) =>
-                      s.date.year == widget.targetDate.year &&
-                      s.date.month == widget.targetDate.month &&
-                      s.date.day == widget.targetDate.day);
-                  widget.controller.shifts.insert(0, newShift);
-                  widget.controller.notifyListeners();
+                  await widget.controller.addOrUpdateShift(newShift);
 
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Shift saved for $dateStr'),
-                      backgroundColor: AppColors.primary,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Shift saved for $dateStr (${newShift.hoursWorked} hrs)'),
+                        backgroundColor: AppColors.primary,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
