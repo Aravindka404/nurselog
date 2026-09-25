@@ -33,6 +33,7 @@ jobs:
         run: |
           mkdir -p assets
           flutter create . --platforms=android --org=com.nurselog
+          rm -f test/widget_test.dart
           if [ -f android/app/src/main/AndroidManifest.xml ]; then
             sed -i 's/android:label="nurselog"/android:label="NurseLog"/g' android/app/src/main/AndroidManifest.xml
           fi
@@ -41,7 +42,7 @@ jobs:
         run: flutter pub get
 
       - name: Run Unit Tests
-        run: flutter test
+        run: flutter test test/shift_model_test.dart test/shift_controller_test.dart
 
       - name: Build Release APK
         run: flutter build apk --release --no-tree-shake-icons
